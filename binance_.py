@@ -53,3 +53,11 @@ class Binance(Exchange):
         print(order)
         print(f"Order placed with id {order['orderId']}")
         # print(client.get_open_orders(symbol=ticker))
+
+    def get_order_details(self, order_id, trading_pair):
+        status = self.client.get_order(
+            symbol=trading_pair,
+            orderId=order_id)
+        details = {"market": status['symbol'],"id": status['orderId'], "status": status['status']}
+        print(details)
+        return details

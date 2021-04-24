@@ -104,3 +104,10 @@ class Buda(Exchange):
         })
         res = response.json()
         print(res)
+
+    def get_order_details(self, order_id=89860660):
+        url = f'https://www.buda.com/api/v2/orders/{order_id}'
+        response = requests.get(url, auth=self.auth).json()['order']
+        details = {"market": response['market_id'],"id": response['id'], "status": response['state']}
+        print(details)
+        return details

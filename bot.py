@@ -155,3 +155,12 @@ class Bot:
         profit = (bids_price - asks_price) * size
         print(f"PROFIT of {'{0:.8f}'.format(profit)} {bids_trading_pair[-3:].upper()} - fees")
         exit()
+
+    def check_order_status(self, exchange, order_id, trading_pair):
+        details = exchange.get_order_details(order_id, trading_pair)
+        if details['status'] in ['FILLED', 'traded']:
+            # order completed succesfully, register en db
+            return True
+        else:
+            # Handle incomplete order
+            return False

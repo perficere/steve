@@ -1,0 +1,17 @@
+{
+  "python.formatting.provider": "black",
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.pythonPath": ".venv/bin/python",
+  "python.autoComplete.extraPaths": ["./steve"],
+  "editor.tabSize": 2,
+  "files.trimTrailingWhitespace": true,
+  "[python]": {
+    "editor.tabSize": 4,
+    "editor.rulers": [90],
+  },
+  "markdownlint.config": {
+    "MD033": false,
+    "MD041": false
+  },
+}

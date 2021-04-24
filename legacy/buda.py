@@ -8,7 +8,6 @@ from keys import BUDA
 from exchange import Exchange
 
 
-
 class BudaHMACAuth(requests.auth.AuthBase):
     """Adjunta la autenticación HMAC de Buda al objeto Request."""
 

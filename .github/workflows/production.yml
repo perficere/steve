@@ -1,0 +1,51 @@
+name: production
+
+on:
+  push:
+    branches:
+      - stable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION_NAME }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: docker build -t $ECR_REPOSITORY:stable --build-arg DJANGO_ENV=production --build-arg DJANGO_SECRET_KEY="$DJANGO_SECRET_KEY" .
+        env:
+          DJANGO_SECRET_KEY: ${{ secrets.PRODUCTION_DJANGO_SECRET_KEY }}
+          ECR_REPOSITORY: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}
+
+      - name: Push Docker image to Amazon ECR
+        run: docker push $ECR_REPOSITORY:stable
+        env:
+          ECR_REPOSITORY: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY_NAME }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v16
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: ${{ secrets.AWS_REGION_NAME }}
+          application_name: ${{ secrets.EB_APPLICATION_NAME }}
+          environment_name: ${{ secrets.EB_PRODUCTION_ENVIRONMENT_NAME }}
+          version_label: ${{ secrets.EB_PRODUCTION_VERSION_LABEL }}

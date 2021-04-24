@@ -1,0 +1,10 @@
+# Begin by ignoring everything (just in case).
+*
+
+# Include application files.
+!steve/
+
+# Include build files.
+!pyproject.toml
+!poetry.lock
+!entrypoint.sh

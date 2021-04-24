@@ -1,0 +1,32 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - ".vscode/**"
+      - "docs/**"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up testing environment
+        run: make localsettings
+
+      - name: Build Docker images
+        run: make build
+
+      - name: Test running functionality
+        run: |
+          docker-compose up --detach
+          docker-compose down
+
+      - name: Run unit tests
+        run: make tests

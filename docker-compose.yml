@@ -1,0 +1,33 @@
+services:
+  db:
+    # Try to use the same version as in production.
+    image: postgres:12.5
+    environment:
+      # Clearly, this password is not secure.
+      # It is used in local development only.
+      POSTGRES_PASSWORD: password
+    volumes:
+      - data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DJANGO_ENV: development
+    init: true
+    volumes:
+      - .:/app
+      - ./steve/static:/app/steve/static
+    environment:
+      PORT: 8000
+      DJANGO_ENV: development
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  data:
+    driver: local

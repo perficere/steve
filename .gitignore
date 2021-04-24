@@ -1,0 +1,11 @@
+# Python.
+__pycache__
+
+# macOS.
+.DS_Store
+
+# Virtual environment.
+.venv
+
+# Secrets.
+local_settings.py

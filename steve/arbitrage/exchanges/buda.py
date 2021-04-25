@@ -59,3 +59,20 @@ class Interface(BaseInterface, metaclass=Singleton):
             amount=amount,
             limit=price,
         )
+
+    def place_limit_order(self, base, quote, side, amount, price):
+        self.client.new_order(
+            market_id=f"{base}{quote}",
+            order_type={BID: self.BUY, ASK: self.SELL}[side],
+            price_type=self.LIMIT,
+            amount=amount,
+            limit=price,
+        )
+
+    def place_market_order(self, base, quote, side, amount):
+        self.client.new_order(
+            market_id=f"{base}{quote}",
+            order_type={BID: self.BUY, ASK: self.SELL}[side],
+            price_type=self.MARKET,
+            amount=amount,
+        )

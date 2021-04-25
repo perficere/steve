@@ -176,6 +176,9 @@ LOGGING = {
 ##############
 
 TICKERS = os.environ.get("TICKERS", "").split(" ")
+MARKETS = tuple(
+    map(lambda pair: pair.split(","), os.environ.get("MARKETS", "").split(" "))
+)
 
 
 ###########

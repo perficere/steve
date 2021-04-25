@@ -3,9 +3,22 @@ from django.conf import settings
 BID, ASK = range(2)
 
 
+def cached(func):
+    def wrapper(interface):
+        if func.__name__ not in interface._cache:
+            interface._cache[func.__name__] = func(interface)
+
+        return interface._cache[func.__name__]
+
+    return wrapper
+
+
 class BaseInterface:
     def __init__(self):
-        raise NotImplementedError()
+        self.clear_cache()
+
+    def clear_cache(self):
+        self._cache = {}
 
     ##########
     # PUBLIC #
@@ -18,12 +31,17 @@ class BaseInterface:
     def get_orderbook(self, base, quote):
         raise NotImplementedError()
 
-    def get_market(self, base, quote):
-        orderbook = self.get_orderbook(base, quote)
+    @property
+    @cached
+    def orderbooks(self):
+        return {tuple(market): self.get_orderbook(*market) for market in settings.MARKETS}
 
+    @property
+    @cached
+    def prices(self):
         return {
-            BID: orderbook[BID][0],
-            ASK: orderbook[ASK][0],
+            tuple(market): {BID: orderbook[BID][0], ASK: orderbook[ASK][0]}
+            for (market, orderbook) in self.orderbooks().items()
         }
 
     #################
@@ -36,5 +54,7 @@ class BaseInterface:
     def place_order(self, base, quote, side, type, amount, price):
         raise NotImplementedError()
 
-    def get_all_available_balances(self):
+    @property
+    @cached
+    def available_balances(self):
         return {ticker: self.get_available_balance(ticker) for ticker in settings.TICKERS}

@@ -1,9 +1,7 @@
 from django.conf import settings
 
-from trading_api_wrappers.Buda import Auth as Client
-from trading_api_wrappers.buda.OrderPriceType import LIMIT, MARKET  # noqa: F401
-from trading_api_wrappers.buda.OrderType import ASK as SELL  # noqa: F401
-from trading_api_wrappers.buda.OrderType import BID as BUY  # noqa: F401
+from trading_api_wrappers.buda import BudaAuth as Client
+from trading_api_wrappers.buda import constants
 from trading_api_wrappers.errors import APIException
 
 from utils.metaclasses import Singleton
@@ -12,7 +10,15 @@ from .base import ASK, BID, BaseInterface
 
 
 class Interface(BaseInterface, metaclass=Singleton):
-    def __init__(self):
+    BUY = constants.OrderType.BID
+    SELL = constants.OrderType.ASK
+
+    LIMIT = constants.OrderPriceType.LIMIT
+    MARKET = constants.OrderPriceType.MARKET
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.client = Client(
             settings.BUDA_API_KEY, settings.BUDA_API_SECRET, return_json=True
         )

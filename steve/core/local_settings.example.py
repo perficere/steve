@@ -42,6 +42,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 ##############
 
 TICKERS = ["BTC", "ETH", "LTC"]
+MARKETS = (["ETH", "BTC"],)
 
 
 ###########

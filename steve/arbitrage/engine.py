@@ -53,7 +53,10 @@ def run():
 
         if delta > settings.MIN_DELTA:
             logger.info(f"PLACING ORDERS FOR {amount} {market[0]}")
+            logger.info(f"Bought from {bid_xcg_name} {amount} @ {bid_price}")
+            logger.info(f"Sold from {ask_xcg_name} {amount} @ {ask_price}")
 
+            # bid_amount != ask_amount ; this will happen when fees are introduced
             # bid_exchange.place_limit_order(
             #     base=market[0],
             #     quote=market[1],

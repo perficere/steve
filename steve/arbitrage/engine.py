@@ -52,7 +52,7 @@ def run():
         amount = min(bid_amount, ask_amount)
 
         if delta > settings.MIN_DELTA:
-            logger.info(f"PLACING ORDERS for {amount} {market[0]}")
+            logger.info(f"PLACING ORDERS FOR {amount} {market[0]}")
 
             # bid_exchange.place_limit_order(
             #     base=market[0],

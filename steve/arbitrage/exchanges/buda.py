@@ -84,8 +84,8 @@ class Interface(BaseInterface, metaclass=Singleton):
             "id": response["id"],
             "status": response["state"],
             "side": response["type"],
-            "price": response["limit"],
-            "amount": response["traded_amount"],
-            "cost": response["total_exchanged"],
+            "price": response["limit"][0],
+            "amount": response["traded_amount"][0],
+            "cost": response["total_exchanged"][0],
         }
         return details

@@ -57,5 +57,5 @@ class Interface(BaseInterface, metaclass=Singleton):
             order_type=side,
             price_type=type_,
             amount=amount,
-            price=price,
+            limit=price,
         )

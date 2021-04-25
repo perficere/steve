@@ -65,5 +65,5 @@ class Interface(BaseInterface, metaclass=Singleton):
             "price": status["price"],
             "size": status["executedQty"],
             "cost": float(status["price"]) * float(status["executedQty"])
-            }
+        }
         return details

@@ -53,3 +53,17 @@ class Interface(BaseInterface, metaclass=Singleton):
             amount=amount,
             price=price,
         )
+
+    def get_order_details(self, order_id, trading_pair=None):
+        url = f'https://www.buda.com/api/v2/orders/{order_id}'
+        response = requests.get(url, auth=self.auth).json()['order']
+        details = {
+            "market": response["market_id"],
+            "id": response["id"],
+            "status": response["state"],
+            "side": response["type"],
+            "price": response["limit"],
+            "size": response["traded_amount"],
+            "cost": response["total_exchanged"]
+            }
+        return details

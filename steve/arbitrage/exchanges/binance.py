@@ -52,3 +52,18 @@ class Interface(BaseInterface, metaclass=Singleton):
             quantity=amount,
             price=price,
         )
+
+    def get_order_details(self, order_id, trading_pair):
+        status = self.client.get_order(
+            symbol=trading_pair,
+            orderId=order_id)
+        details = {
+            "market": status["symbol"],
+            "id": status["orderId"],
+            "status": status["status"],
+            "side": status["side"],
+            "price": status["price"],
+            "size": status["executedQty"],
+            "cost": float(status["price"]) * float(status["executedQty"])
+            }
+        return details

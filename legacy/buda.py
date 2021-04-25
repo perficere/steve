@@ -44,7 +44,6 @@ class BudaHMACAuth(requests.auth.AuthBase):
         return r
 
 class Buda(Exchange):
-
     def __init__(self):
         Exchange.__init__(self, "buda", BUDA['key'], BUDA['secret'])
         self.auth = BudaHMACAuth(self.key, self.secret)

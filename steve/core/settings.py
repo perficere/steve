@@ -175,7 +175,7 @@ LOGGING = {
 # PARAMETERS #
 ##############
 
-# None.
+TICKERS = os.environ.get("TICKERS", "").split(" ")
 
 
 ###########

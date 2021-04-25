@@ -48,7 +48,7 @@ MARKETS = (["ETH", "BTC"],)
 
 MIN_DELTA = Decimal("0.01")
 
-MAX_SIZE = {"ETH": 0.0005, "LTC": 0.04}
+MAX_SIZE = {"ETH": "0.0005", "LTC": "0.04"}
 
 
 ###########

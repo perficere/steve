@@ -1,6 +1,6 @@
+from decimal import Decimal
 from logging import getLogger
 from operator import attrgetter
-from decimal import Decimal
 
 from django.conf import settings
 

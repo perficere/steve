@@ -41,7 +41,7 @@ class BaseInterface:
     def prices(self):
         return {
             tuple(market): {BID: orderbook[BID][0], ASK: orderbook[ASK][0]}
-            for (market, orderbook) in self.orderbooks().items()
+            for (market, orderbook) in self.orderbooks.items()
         }
 
     #################

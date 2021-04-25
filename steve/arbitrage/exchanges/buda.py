@@ -10,6 +10,8 @@ from .base import ASK, BID, BaseInterface
 
 
 class Interface(BaseInterface, metaclass=Singleton):
+    __name__ = "Buda"
+
     BUY = constants.OrderType.BID
     SELL = constants.OrderType.ASK
 

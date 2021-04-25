@@ -1,5 +1,6 @@
 import os
 import sys
+from decimal import Decimal
 
 import dj_database_url
 import sentry_sdk
@@ -179,6 +180,8 @@ TICKERS = os.environ.get("TICKERS", "").split(" ")
 MARKETS = tuple(
     map(lambda pair: pair.split(","), os.environ.get("MARKETS", "").split(" "))
 )
+
+MIN_DELTA = Decimal(os.environ.get("MIN_DELTA", "inf"))
 
 
 ###########

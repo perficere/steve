@@ -62,14 +62,17 @@ class Bot:
     def get_best_delta(self, order_book):
         bids = []
         asks = []
+
         for exchange in order_book:
             for elem in order_book[exchange]['bids']:
                 bids.append([*elem, exchange])
             for elem in order_book[exchange]['asks']:
                 asks.append([*elem, exchange])
+                
         best_bid = max(bids)
         best_ask = min(asks)
         delta = (best_bid[0] - best_ask[0]) / best_ask[0]
+
         return best_ask, best_bid, delta
 
     def create_order(self, exchange, trading_pair, price, size):

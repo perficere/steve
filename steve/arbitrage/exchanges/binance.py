@@ -10,6 +10,8 @@ from .base import ASK, BID, BaseInterface
 
 
 class Interface(BaseInterface, metaclass=Singleton):
+    __name__ = "Binance"
+
     BUY = enums.SIDE_BUY
     SELL = enums.SIDE_SELL
 

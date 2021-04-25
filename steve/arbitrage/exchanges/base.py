@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from .enums import ASK, BID
+BID, ASK = range(2)
 
 
 class BaseInterface:

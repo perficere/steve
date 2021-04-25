@@ -3,13 +3,13 @@ from django.conf import settings
 from binance.client import Client
 from binance.enums import ORDER_TYPE_LIMIT as LIMIT  # noqa: F401
 from binance.enums import ORDER_TYPE_MARKET as MARKET  # noqa: F401
-from binance.enums import SIDE_BUY as BID
-from binance.enums import SIDE_SELL as ASK
+from binance.enums import SIDE_BUY as BUY  # noqa: F401
+from binance.enums import SIDE_SELL as SELL  # noqa: F401
 from binance.exceptions import BinanceAPIException as APIException
 
 from utils.metaclasses import Singleton
 
-from .base import BaseInterface
+from .base import ASK, BID, BaseInterface
 
 
 class Interface(BaseInterface, metaclass=Singleton):

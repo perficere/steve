@@ -1,10 +1,7 @@
 from django.conf import settings
 
+from binance import enums
 from binance.client import Client
-from binance.enums import ORDER_TYPE_LIMIT as LIMIT  # noqa: F401
-from binance.enums import ORDER_TYPE_MARKET as MARKET  # noqa: F401
-from binance.enums import SIDE_BUY as BUY  # noqa: F401
-from binance.enums import SIDE_SELL as SELL  # noqa: F401
 from binance.exceptions import BinanceAPIException as APIException
 
 from utils.metaclasses import Singleton
@@ -13,7 +10,15 @@ from .base import ASK, BID, BaseInterface
 
 
 class Interface(BaseInterface, metaclass=Singleton):
-    def __init__(self):
+    BUY = enums.SIDE_BUY
+    SELL = enums.SIDE_SELL
+
+    LIMIT = enums.ORDER_TYPE_LIMIT
+    MARKET = enums.ORDER_TYPE_MARKET
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.client = Client(settings.BINANCE_API_KEY, settings.BINANCE_API_SECRET)
 
     ##########
@@ -44,11 +49,11 @@ class Interface(BaseInterface, metaclass=Singleton):
     def get_available_balance(self, ticker):
         return self.client.get_asset_balance(asset=ticker)["free"]
 
-    def place_order(self, base, quote, side, type_, amount, price):
+    def place_limit_order(self, base, quote, side, amount, price):
         self.client.create_order(
             symbol=f"{base}{quote}",
-            side=side,
-            type=type_,
+            side={BID: self.BUY, ASK: self.SELL}[side],
+            type=self.LIMIT,
             quantity=amount,
             price=price,
         )
@@ -67,3 +72,10 @@ class Interface(BaseInterface, metaclass=Singleton):
             "cost": float(status["price"]) * float(status["executedQty"])
         }
         return details
+    def place_market_order(self, base, quote, side, amount):
+        self.client.create_order(
+            symbol=f"{base}{quote}",
+            side={BID: self.BUY, ASK: self.SELL}[side],
+            type=self.MARKET,
+            quantity=amount,
+        )

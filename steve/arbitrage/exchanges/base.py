@@ -41,7 +41,7 @@ class BaseInterface:
     def prices(self):
         return {
             tuple(market): {BID: orderbook[BID][0], ASK: orderbook[ASK][0]}
-            for (market, orderbook) in self.orderbooks().items()
+            for (market, orderbook) in self.orderbooks.items()
         }
 
     #################
@@ -51,7 +51,10 @@ class BaseInterface:
     def get_available_balance(self, ticker):
         raise NotImplementedError()
 
-    def place_order(self, base, quote, side, type, amount, price):
+    def place_limit_order(self, base, quote, side, type_, amount, price):
+        raise NotImplementedError()
+
+    def place_market_order(self, base, quote, side, type_, amount):
         raise NotImplementedError()
 
     @property

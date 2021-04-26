@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from .settings import *  # noqa: F401,F403
 
 #############
@@ -43,6 +45,10 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
 TICKERS = ["BTC", "ETH", "LTC"]
 MARKETS = (["ETH", "BTC"],)
+
+MIN_DELTA = Decimal("0.01")
+
+MAX_SIZE = {"ETH": "0.0005", "LTC": "0.04"}
 
 
 ###########

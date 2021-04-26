@@ -58,7 +58,7 @@ class Interface(BaseInterface, metaclass=Singleton):
             type=self.LIMIT,
             quantity=amount,
             price=price,
-        )
+        )[['orderId']]
 
     def place_market_order(self, base, quote, side, amount):
         return self.client.create_order(
@@ -66,4 +66,4 @@ class Interface(BaseInterface, metaclass=Singleton):
             side={BID: self.BUY, ASK: self.SELL}[side],
             type=self.MARKET,
             quantity=amount,
-        )
+        )[['orderId']]

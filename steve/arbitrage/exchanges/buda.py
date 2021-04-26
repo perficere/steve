@@ -61,7 +61,7 @@ class Interface(BaseInterface, metaclass=Singleton):
             amount=amount,
             limit=price,
         )
-        return res['order']['id']
+        return res["order"]["id"]
 
     def place_limit_order(self, base, quote, side, amount, price):
         res = self.client.new_order(
@@ -71,7 +71,7 @@ class Interface(BaseInterface, metaclass=Singleton):
             amount=amount,
             limit=price,
         )
-        return res['order']['id']
+        return res["order"]["id"]
 
     def place_market_order(self, base, quote, side, amount):
         res = self.client.new_order(
@@ -80,4 +80,4 @@ class Interface(BaseInterface, metaclass=Singleton):
             price_type=self.MARKET,
             amount=amount,
         )
-        return res['order']['id']
+        return res["order"]["id"]

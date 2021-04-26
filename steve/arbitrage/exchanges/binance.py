@@ -59,7 +59,7 @@ class Interface(BaseInterface, metaclass=Singleton):
             quantity=amount,
             price=price,
         )
-        return res['orderId']
+        return res["orderId"]
 
     def place_market_order(self, base, quote, side, amount):
         res = self.client.create_order(
@@ -68,4 +68,4 @@ class Interface(BaseInterface, metaclass=Singleton):
             type=self.MARKET,
             quantity=amount,
         )
-        return res['orderId']
+        return res["orderId"]

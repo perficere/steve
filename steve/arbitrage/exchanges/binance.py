@@ -52,18 +52,20 @@ class Interface(BaseInterface, metaclass=Singleton):
         return self.client.get_asset_balance(asset=ticker)["free"]
 
     def place_limit_order(self, base, quote, side, amount, price):
-        self.client.create_order(
+        res = self.client.create_order(
             symbol=f"{base}{quote}",
             side={BID: self.BUY, ASK: self.SELL}[side],
             type=self.LIMIT,
             quantity=amount,
             price=price,
         )
+        return res["orderId"]
 
     def place_market_order(self, base, quote, side, amount):
-        self.client.create_order(
+        res = self.client.create_order(
             symbol=f"{base}{quote}",
             side={BID: self.BUY, ASK: self.SELL}[side],
             type=self.MARKET,
             quantity=amount,
         )
+        return res["orderId"]

@@ -42,18 +42,20 @@ def run():
         # ask_exchange = exchanges[ask_xcg_name]
 
         bid_price, bid_amount = prices[bid_xcg_name][BID]
-        ask_price, ask_amount = prices[bid_xcg_name][ASK]
+        ask_price, ask_amount = prices[ask_xcg_name][ASK]
 
         delta = (Decimal(bid_price) - Decimal(ask_price)) / Decimal(ask_price)
 
-        logger.info(f"DELTA IN MARKET {market}: {100 * delta}%")
+        logger.info(f"DELTA IN MARKET {market}: {round(100 * delta, 4)}%")
         logger.info(f"MIN DELTA: {100 * settings.MIN_DELTA}%")
-
-        amount = min(bid_amount, ask_amount)
+        amount = min(bid_amount, ask_amount, settings.MAX_SIZE[market[0]])
 
         if delta > settings.MIN_DELTA:
             logger.info(f"PLACING ORDERS FOR {amount} {market[0]}")
+            logger.info(f"Bought from {bid_xcg_name} {amount} @ {bid_price}")
+            logger.info(f"Sold from {ask_xcg_name} {amount} @ {ask_price}")
 
+            # bid_amount != ask_amount ; this will happen when fees are introduced
             # bid_exchange.place_limit_order(
             #     base=market[0],
             #     quote=market[1],

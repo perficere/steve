@@ -31,7 +31,7 @@ def run():
     exchanges = {el().__name__: el() for el in EXCHANGES}
 
     available_balances = apply(exchanges, attrgetter("available_balances"))
-    logger.info(f"{available_balances}")
+    # logger.info(f"{available_balances}")
     all_prices = apply(exchanges, attrgetter("prices"))
 
     for market in map(tuple, settings.MARKETS):
@@ -61,26 +61,33 @@ def run():
             logger.info(f"PLACING ORDERS FOR {amount} {market[0]}")
 
             # Check if enough balance for trade
-            if amount > bid_balance and (amount > (ask_balance * ask_price)):
-            # bid_amount != ask_amount ; this will happen when fees are introduced
-                # bid_res = bid_exchange.place_limit_order(
-                #     base=market[0],
-                #     quote=market[1],
-                #     side=BID,
-                #     amount=amount,
-                #     price=bid_price,
-                # )
-                logger.info(f"Sold from {bid_xcg_name} {amount} @ {bid_price}")
-                # logger.info(f"Order Id: {bid_res}")
-                # ask_res = ask_exchange.place_limit_order(
-                #     base=market[0],
-                #     quote=market[1],
-                #     side=ASK,
-                #     amount=amount,
-                #     price=ask_price,
-                # )
-                logger.info(f"Bought from {ask_xcg_name} {amount} @ {ask_price}")
-                # logger.info(f"Order Id: {ask_res}")
+            ask_amount_transformed = Decimal(ask_balance) * Decimal(ask_price)
+            if amount > bid_balance and Decimal(amount) > ask_amount_transformed:
+                # bid_amount != ask_amount ; this will happen when fees are introduced
+                bid_order_id = bid_exchange.place_limit_order(
+                    base=market[0],
+                    quote=market[1],
+                    side=BID,
+                    amount=amount,
+                    price=bid_price,
+                )
+                if bid_exchange.order_filled(bid_order_id, market[0], market[1]):
+                    logger.info(f"Sold from {bid_xcg_name} {amount} @ {bid_price}")
+                else:
+                    logger.info(f"Sell FAILED from {bid_xcg_name} {amount} @ {bid_price}")
+                # logger.info(f"Order Id: {bid_order_id}")
+                ask_order_id = ask_exchange.place_limit_order(
+                    base=market[0],
+                    quote=market[1],
+                    side=ASK,
+                    amount=amount,
+                    price=ask_price,
+                )
+                if ask_exchange.order_filled(ask_order_id, market[0], market[1]):
+                    logger.info(f"Bought from {ask_xcg_name} {amount} @ {ask_price}")
+                else:
+                    logger.info(f"Buy FAILED from {ask_xcg_name} {amount} @ {ask_price}")
+                # logger.info(f"Order Id: {ask_order_id}")
             else:
                 logger.info(f"Not enough balance for trade. {bid_balance}, {ask_balance}")
     for exchange in exchanges.values():

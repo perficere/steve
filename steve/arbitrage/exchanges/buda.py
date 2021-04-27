@@ -81,3 +81,16 @@ class Interface(BaseInterface, metaclass=Singleton):
             amount=amount,
         )
         return res["order"]["id"]
+
+    def get_order_details(self, order_id, market=None):
+        response = self.client.order_details(order_id=order_id)["order"]
+        details = {
+            "market": response["market_id"],
+            "id": response["id"],
+            "status": response["state"],
+            "side": response["type"],
+            "price": response["limit"][0],
+            "amount": response["traded_amount"][0],
+            "cost": response["total_exchanged"][0],
+        }
+        return details

@@ -30,7 +30,8 @@ def find_best_trade(market_prices):
 def run():
     exchanges = {el().__name__: el() for el in EXCHANGES}
 
-    # available_balances = apply(exchanges, attrgetter("available_balances"))
+    available_balances = apply(exchanges, attrgetter("available_balances"))
+    logger.info(f"{available_balances}")
     all_prices = apply(exchanges, attrgetter("prices"))
 
     for market in map(tuple, settings.MARKETS):
@@ -41,6 +42,12 @@ def run():
         bid_exchange = exchanges[bid_xcg_name]
         ask_exchange = exchanges[ask_xcg_name]
 
+        bid_balance = available_balances[bid_xcg_name][market[0]]
+        ask_balance = available_balances[ask_xcg_name][market[1]]
+
+        logger.info(f"sell {bid_balance}")
+        logger.info(f"buy {ask_balance}")
+
         bid_price, bid_amount = prices[bid_xcg_name][BID]
         ask_price, ask_amount = prices[ask_xcg_name][ASK]
 
@@ -50,27 +57,31 @@ def run():
         logger.info(f"MIN DELTA: {100 * settings.MIN_DELTA}%")
         amount = min(bid_amount, ask_amount, settings.MAX_SIZE[market[0]])
 
-        if delta > settings.MIN_DELTA:
+        if delta > settings.MIN_DELTA and amount >= settings.MIN_SIZE[market[0]]:
             logger.info(f"PLACING ORDERS FOR {amount} {market[0]}")
 
+            # Check if enough balance for trade
+            if amount > bid_balance and (amount > (ask_balance * ask_price)):
             # bid_amount != ask_amount ; this will happen when fees are introduced
-            bid_res = bid_exchange.place_limit_order(
-                base=market[0],
-                quote=market[1],
-                side=BID,
-                amount=amount,
-                price=bid_price,
-            )
-            logger.info(f"Sold from {bid_xcg_name} {amount} @ {bid_price}")
-            logger.info(f"Order Id: {bid_res}")
-            ask_res = ask_exchange.place_limit_order(
-                base=market[0],
-                quote=market[1],
-                side=ASK,
-                amount=amount,
-                price=ask_price,
-            )
-            logger.info(f"Bought from {ask_xcg_name} {amount} @ {ask_price}")
-            logger.info(f"Order Id: {ask_res}")
+                # bid_res = bid_exchange.place_limit_order(
+                #     base=market[0],
+                #     quote=market[1],
+                #     side=BID,
+                #     amount=amount,
+                #     price=bid_price,
+                # )
+                logger.info(f"Sold from {bid_xcg_name} {amount} @ {bid_price}")
+                # logger.info(f"Order Id: {bid_res}")
+                # ask_res = ask_exchange.place_limit_order(
+                #     base=market[0],
+                #     quote=market[1],
+                #     side=ASK,
+                #     amount=amount,
+                #     price=ask_price,
+                # )
+                logger.info(f"Bought from {ask_xcg_name} {amount} @ {ask_price}")
+                # logger.info(f"Order Id: {ask_res}")
+            else:
+                logger.info(f"Not enough balance for trade. {bid_balance}, {ask_balance}")
     for exchange in exchanges.values():
         exchange.clear_cache()

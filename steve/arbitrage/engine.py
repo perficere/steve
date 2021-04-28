@@ -27,11 +27,22 @@ def find_best_trade(market_prices):
     return bid_xcg_name, ask_xcg_name
 
 
+def get_total_balances(available_balances):
+    total_balances = {}
+    for xcg in available_balances.values():
+        for ticker in xcg:
+            if ticker not in total_balances:
+                total_balances[ticker] = Decimal(xcg[ticker])
+            else:
+                total_balances[ticker] += Decimal(xcg[ticker])
+    return total_balances
+
+
 def run():
     exchanges = {el().__name__: el() for el in EXCHANGES}
 
     available_balances = apply(exchanges, attrgetter("available_balances"))
-    # logger.info(f"{available_balances}")
+    total_balances = get_total_balances(available_balances)
     all_prices = apply(exchanges, attrgetter("prices"))
 
     for market in map(tuple, settings.MARKETS):
@@ -45,9 +56,6 @@ def run():
         bid_balance = available_balances[bid_xcg_name][market[0]]
         ask_balance = available_balances[ask_xcg_name][market[1]]
 
-        logger.info(f"sell {bid_balance}")
-        logger.info(f"buy {ask_balance}")
-
         bid_price, bid_amount = prices[bid_xcg_name][BID]
         ask_price, ask_amount = prices[ask_xcg_name][ASK]
 
@@ -59,6 +67,7 @@ def run():
 
         if delta > settings.MIN_DELTA and amount >= settings.MIN_SIZE[market[0]]:
             logger.info(f"PLACING ORDERS FOR {amount} {market[0]}")
+            logger.info(f"Starting balances {total_balances}")
 
             # Check if enough balance for trade
             ask_amount_transformed = Decimal(ask_balance) * Decimal(ask_price)
@@ -71,11 +80,6 @@ def run():
                     amount=amount,
                     price=bid_price,
                 )
-                if bid_exchange.order_filled(bid_order_id, market[0], market[1]):
-                    logger.info(f"Sold from {bid_xcg_name} {amount} @ {bid_price}")
-                    break
-                else:
-                    logger.info(f"Sell FAILED from {bid_xcg_name} {amount} @ {bid_price}")
                 ask_order_id = ask_exchange.place_limit_order(
                     base=market[0],
                     quote=market[1],
@@ -83,11 +87,24 @@ def run():
                     amount=amount,
                     price=ask_price,
                 )
-                if ask_exchange.order_filled(ask_order_id, market[0], market[1]):
+                bid_status = bid_exchange.order_filled(bid_order_id, market[0], market[1])
+                ask_status = ask_exchange.order_filled(ask_order_id, market[0], market[1])
+                if bid_status:
+                    logger.info(f"Sold from {bid_xcg_name} {amount} @ {bid_price}")
+                else:
+                    logger.info(f"Sell FAILED from {bid_xcg_name} {amount} @ {bid_price}")
+                    # Handle this failed transaction
+                if ask_status:
                     logger.info(f"Bought from {ask_xcg_name} {amount} @ {ask_price}")
                 else:
                     logger.info(f"Buy FAILED from {ask_xcg_name} {amount} @ {ask_price}")
                     # Handle this failed transaction
+                if bid_status and ask_status:
+                    available_balances = apply(
+                        exchanges, attrgetter("available_balances")
+                    )
+                    total_balances = get_total_balances(available_balances)
+                    logger.info(f"Final balances {total_balances}")
 
             else:
                 logger.info(f"Not enough balance for trade. {bid_balance}, {ask_balance}")

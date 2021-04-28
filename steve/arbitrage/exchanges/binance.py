@@ -52,19 +52,18 @@ class Interface(BaseInterface, metaclass=Singleton):
         return self.client.get_asset_balance(asset=ticker)["free"]
 
     def place_limit_order(self, base, quote, side, amount, price):
-        # return {ASK: self.BUY, BID: self.SELL}[side]
         res = self.client.create_order(
             symbol=f"{base}{quote}",
             side={ASK: self.BUY, BID: self.SELL}[side],
             type=self.LIMIT,
             quantity=amount,
             price=price,
-            timeInForce = 'GTC',
+            timeInForce="GTC",
         )
         return res["orderId"]
 
-    def get_order_details(self, order_id, market):
-        status = self.client.get_order(symbol=market, orderId=order_id)
+    def get_order_details(self, order_id, base, quote):
+        status = self.client.get_order(symbol=f"{base}{quote}", orderId=order_id)
         details = {
             "market": status["symbol"],
             "id": status["orderId"],
@@ -82,6 +81,13 @@ class Interface(BaseInterface, metaclass=Singleton):
             side={BID: self.BUY, ASK: self.SELL}[side],
             type=self.MARKET,
             quantity=amount,
-            timeInForce = 'GTC',
+            timeInForce="GTC",
         )
         return res["orderId"]
+
+    def order_filled(self, order_id, base, quote):
+        details = self.get_order_details(order_id, base, quote)
+        if details["status"] == "FILLED":
+            return True
+        else:
+            return False

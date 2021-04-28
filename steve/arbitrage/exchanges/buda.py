@@ -64,7 +64,6 @@ class Interface(BaseInterface, metaclass=Singleton):
         return res["order"]["id"]
 
     def place_limit_order(self, base, quote, side, amount, price):
-        # return {ASK: self.BUY, BID: self.SELL}[side]
         res = self.client.new_order(
             market_id=f"{base}-{quote}",
             order_type={ASK: self.BUY, BID: self.SELL}[side],
@@ -83,7 +82,7 @@ class Interface(BaseInterface, metaclass=Singleton):
         )
         return res["order"]["id"]
 
-    def get_order_details(self, order_id, market=None):
+    def get_order_details(self, order_id, base=None, quote=None):
         response = self.client.order_details(order_id=order_id)["order"]
         details = {
             "market": response["market_id"],
@@ -95,3 +94,10 @@ class Interface(BaseInterface, metaclass=Singleton):
             "cost": response["total_exchanged"][0],
         }
         return details
+
+    def order_filled(self, order_id, base, quote):
+        details = self.get_order_details(order_id, base, quote)
+        if details["status"] == "traded":
+            return True
+        else:
+            return False

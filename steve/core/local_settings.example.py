@@ -48,8 +48,11 @@ MARKETS = (["ETH", "BTC"],)
 
 MIN_DELTA = Decimal("0.01")
 
-MIN_SIZE = {"ETH": "0.001", "LTC": "0.01"}  # Defined by Binance
-MAX_SIZE = {"ETH": "0.0005", "LTC": "0.04"}
+MIN_SIZE = {"ETHBTC": "0.001", "LTCBTC": "0.01"} # Defined by Binance
+MAX_SIZE = {"ETHBTC": "0.2", "LTCBTC": "0.04"}
+STEP_SIZE = {"ETHBTC": "0.001", "LTCBTC": "0.01"}
+
+FEES = Decimal("0.007")
 
 
 ###########

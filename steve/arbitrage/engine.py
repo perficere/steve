@@ -40,8 +40,8 @@ def get_total_balances(available_balances):
 
 
 def filter_amount_by_stepsize(amount, market_symbol):
-    step_size = float(settings.STEP_SIZE[market_symbol].find("1") - 1)
-    step_size_amount = math.floor(amount * 10 ** step_size) / float(10 ** step_size)
+    step_size = Decimal(settings.STEP_SIZE[market_symbol].find("1") - 1)
+    step_size_amount = math.floor(amount * 10 ** step_size) / Decimal(10 ** step_size)
     return step_size_amount
 
 
@@ -80,9 +80,9 @@ def run():
             # Check if enough balance for trade
             ask_amount_transformed = Decimal(ask_balance) * Decimal(ask_price)
             if amount > bid_balance and Decimal(amount) > ask_amount_transformed:
-                ask_amount = filter_amount_by_stepsize(float(amount), market_symbol)
+                ask_amount = filter_amount_by_stepsize(Decimal(amount), market_symbol)
                 bid_amount = filter_amount_by_stepsize(
-                    float(amount) * (1 - settings.FEES), market_symbol
+                    Decimal(amount) * (1 - settings.FEES), market_symbol
                 )
                 # bid_amount != ask_amount ; this will happen when fees are introduced
                 bid_order_id = bid_exchange.place_limit_order(

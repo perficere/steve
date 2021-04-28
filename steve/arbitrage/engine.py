@@ -73,9 +73,9 @@ def run():
                 )
                 if bid_exchange.order_filled(bid_order_id, market[0], market[1]):
                     logger.info(f"Sold from {bid_xcg_name} {amount} @ {bid_price}")
+                    break
                 else:
                     logger.info(f"Sell FAILED from {bid_xcg_name} {amount} @ {bid_price}")
-                # logger.info(f"Order Id: {bid_order_id}")
                 ask_order_id = ask_exchange.place_limit_order(
                     base=market[0],
                     quote=market[1],
@@ -87,7 +87,8 @@ def run():
                     logger.info(f"Bought from {ask_xcg_name} {amount} @ {ask_price}")
                 else:
                     logger.info(f"Buy FAILED from {ask_xcg_name} {amount} @ {ask_price}")
-                # logger.info(f"Order Id: {ask_order_id}")
+                    # Handle this failed transaction
+
             else:
                 logger.info(f"Not enough balance for trade. {bid_balance}, {ask_balance}")
     for exchange in exchanges.values():

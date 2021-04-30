@@ -41,8 +41,8 @@ def get_total_balances(available_balances):
 
 def filter_amount_by_stepsize(amount, market_symbol):
     step_size = Decimal(settings.STEP_SIZE[market_symbol].find("1") - 1)
-    step_size_amount = math.floor(amount * 10 ** step_size) / Decimal(10 ** step_size)
-    return step_size_amount
+    step_size_amount = math.floor(amount * 10 ** step_size) / (10 ** step_size)
+    return max(step_size_amount, settings.MIN_SIZE[market_symbol])
 
 
 def run():
@@ -53,63 +53,73 @@ def run():
     all_prices = apply(exchanges, attrgetter("prices"))
 
     for market in map(tuple, settings.MARKETS):
+        base, quote = market
         prices = select(all_prices, market)
-        market_symbol = f"{market[0]}{market[1]}"
+        market_symbol = f"{base}{quote}"
 
         bid_xcg_name, ask_xcg_name = find_best_trade(prices)
 
         bid_exchange = exchanges[bid_xcg_name]
         ask_exchange = exchanges[ask_xcg_name]
 
-        bid_balance = available_balances[bid_xcg_name][market[0]]
-        ask_balance = available_balances[ask_xcg_name][market[1]]
+        bid_balance = available_balances[bid_xcg_name][base]
+        ask_balance = available_balances[ask_xcg_name][quote]
 
         bid_price, bid_amount = prices[bid_xcg_name][BID]
         ask_price, ask_amount = prices[ask_xcg_name][ASK]
 
         delta = (Decimal(bid_price) - Decimal(ask_price)) / Decimal(ask_price)
 
-        logger.info(f"DELTA IN MARKET {market}: {round(100 * delta, 4)}%")
+        logger.info(f"DELTA IN MARKET {market_symbol}: {round(100 * delta, 4)}%")
         logger.info(f"MIN DELTA: {100 * settings.MIN_DELTA}%")
-        amount = min(bid_amount, ask_amount, settings.MAX_SIZE[market_symbol])
+        amount = min(
+            Decimal(bid_amount), Decimal(ask_amount), settings.MAX_SIZE[market_symbol]
+        )
 
-        if delta > settings.MIN_DELTA and amount >= settings.MIN_SIZE[market_symbol]:
-            logger.info(f"PLACING ORDERS FOR {amount} {market[0]}")
+        if delta >= settings.MIN_DELTA and amount >= settings.MIN_SIZE[market_symbol]:
+            logger.info(f"PLACING ORDERS FOR {amount} {base}")
             logger.info(f"Starting balances {total_balances}")
 
             # Check if enough balance for trade
-            ask_amount_transformed = Decimal(ask_balance) * Decimal(ask_price)
-            if amount > bid_balance and Decimal(amount) > ask_amount_transformed:
+            ask_balance_transformed = Decimal(ask_balance) / Decimal(ask_price)
+            if (
+                amount < Decimal(bid_balance)
+                and Decimal(amount) < ask_balance_transformed
+            ):
                 ask_amount = filter_amount_by_stepsize(Decimal(amount), market_symbol)
                 bid_amount = filter_amount_by_stepsize(
-                    Decimal(amount) * (1 - settings.FEES), market_symbol
+                    amount * (1 - settings.FEES), market_symbol
                 )
                 # bid_amount != ask_amount ; this will happen when fees are introduced
                 bid_order_id = bid_exchange.place_limit_order(
-                    base=market[0],
-                    quote=market[1],
+                    base=base,
+                    quote=quote,
                     side=BID,
                     amount=bid_amount,
                     price=bid_price,
                 )
                 ask_order_id = ask_exchange.place_limit_order(
-                    base=market[0],
-                    quote=market[1],
+                    base=base,
+                    quote=quote,
                     side=ASK,
                     amount=ask_amount,
                     price=ask_price,
                 )
-                bid_status = bid_exchange.order_filled(bid_order_id, market[0], market[1])
-                ask_status = ask_exchange.order_filled(ask_order_id, market[0], market[1])
+                bid_status = bid_exchange.order_filled(bid_order_id, base, quote)
+                ask_status = ask_exchange.order_filled(ask_order_id, base, quote)
                 if bid_status:
                     logger.info(f"Sold from {bid_xcg_name} {bid_amount} @ {bid_price}")
                 else:
-                    logger.info(f"Sell FAILED {bid_xcg_name} {bid_amount} @ {bid_price}")
+                    logger.warning(
+                        f"Sell FAILED {bid_xcg_name} {bid_amount} @ {bid_price}"
+                    )
                     # Handle this failed transaction
                 if ask_status:
                     logger.info(f"Bought from {ask_xcg_name} {ask_amount} @ {ask_price}")
                 else:
-                    logger.info(f"Buy FAILED {ask_xcg_name} {ask_amount} @ {ask_price}")
+                    logger.warning(
+                        f"Buy FAILED {ask_xcg_name} {ask_amount} @ {ask_price}"
+                    )
                     # Handle this failed transaction
                 if bid_status and ask_status:
                     available_balances = apply(

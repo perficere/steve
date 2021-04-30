@@ -45,6 +45,7 @@ def filter_amount_by_stepsize(amount, market_symbol):
     return max(step_size_amount, settings.MIN_SIZE[market_symbol])
 
 
+
 def run():
     exchanges = {el().__name__: el() for el in EXCHANGES}
 
@@ -56,6 +57,7 @@ def run():
         base, quote = market
         prices = select(all_prices, market)
         market_symbol = f"{base}{quote}"
+
 
         bid_xcg_name, ask_xcg_name = find_best_trade(prices)
 
@@ -86,24 +88,22 @@ def run():
                     amount * (1 - settings.FEES), market_symbol
                 )
                 # bid_amount != ask_amount ; this will happen when fees are introduced
-                # bid_order_id = bid_exchange.place_limit_order(
-                #     base=base,
-                #     quote=quote,
-                #     side=BID,
-                #     amount=bid_amount,
-                #     price=bid_price,
-                # )
-                # ask_order_id = ask_exchange.place_limit_order(
-                #     base=base,
-                #     quote=quote,
-                #     side=ASK,
-                #     amount=ask_amount,
-                #     price=ask_price,
-                # )
-                bid_status = True
-                ask_status = True
-                # bid_status = bid_exchange.order_filled(bid_order_id, base, quote)
-                # ask_status = ask_exchange.order_filled(ask_order_id, base, quote)
+                bid_order_id = bid_exchange.place_limit_order(
+                    base=base,
+                    quote=quote,
+                    side=BID,
+                    amount=bid_amount,
+                    price=bid_price,
+                )
+                ask_order_id = ask_exchange.place_limit_order(
+                    base=base,
+                    quote=quote,
+                    side=ASK,
+                    amount=ask_amount,
+                    price=ask_price,
+                )
+                bid_status = bid_exchange.order_filled(bid_order_id, base, quote)
+                ask_status = ask_exchange.order_filled(ask_order_id, base, quote)
                 if bid_status:
                     logger.info(f"Sold from {bid_xcg_name} {bid_amount} @ {bid_price}")
                 else:

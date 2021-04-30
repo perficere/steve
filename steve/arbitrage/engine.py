@@ -45,7 +45,6 @@ def filter_amount_by_stepsize(amount, market_symbol):
     return max(step_size_amount, settings.MIN_SIZE[market_symbol])
 
 
-
 def run():
     exchanges = {el().__name__: el() for el in EXCHANGES}
 
@@ -57,7 +56,6 @@ def run():
         base, quote = market
         prices = select(all_prices, market)
         market_symbol = f"{base}{quote}"
-
 
         bid_xcg_name, ask_xcg_name = find_best_trade(prices)
 
@@ -74,7 +72,9 @@ def run():
 
         logger.info(f"DELTA IN MARKET {market_symbol}: {round(100 * delta, 4)}%")
         logger.info(f"MIN DELTA: {100 * settings.MIN_DELTA}%")
-        amount = min(Decimal(bid_amount), Decimal(ask_amount), settings.MAX_SIZE[market_symbol])
+        amount = min(
+            Decimal(bid_amount), Decimal(ask_amount), settings.MAX_SIZE[market_symbol]
+        )
 
         if delta >= settings.MIN_DELTA and amount >= settings.MIN_SIZE[market_symbol]:
             logger.info(f"PLACING ORDERS FOR {amount} {base}")
@@ -82,7 +82,10 @@ def run():
 
             # Check if enough balance for trade
             ask_balance_transformed = Decimal(ask_balance) / Decimal(ask_price)
-            if amount < Decimal(bid_balance) and Decimal(amount) < ask_balance_transformed:
+            if (
+                amount < Decimal(bid_balance)
+                and Decimal(amount) < ask_balance_transformed
+            ):
                 ask_amount = filter_amount_by_stepsize(Decimal(amount), market_symbol)
                 bid_amount = filter_amount_by_stepsize(
                     amount * (1 - settings.FEES), market_symbol
@@ -107,12 +110,16 @@ def run():
                 if bid_status:
                     logger.info(f"Sold from {bid_xcg_name} {bid_amount} @ {bid_price}")
                 else:
-                    logger.warning(f"Sell FAILED {bid_xcg_name} {bid_amount} @ {bid_price}")
+                    logger.warning(
+                        f"Sell FAILED {bid_xcg_name} {bid_amount} @ {bid_price}"
+                    )
                     # Handle this failed transaction
                 if ask_status:
                     logger.info(f"Bought from {ask_xcg_name} {ask_amount} @ {ask_price}")
                 else:
-                    logger.warning(f"Buy FAILED {ask_xcg_name} {ask_amount} @ {ask_price}")
+                    logger.warning(
+                        f"Buy FAILED {ask_xcg_name} {ask_amount} @ {ask_price}"
+                    )
                     # Handle this failed transaction
                 if bid_status and ask_status:
                     available_balances = apply(

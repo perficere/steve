@@ -1,4 +1,5 @@
 import math
+import threading as th
 from decimal import Decimal
 from logging import getLogger
 from operator import attrgetter
@@ -45,7 +46,7 @@ def filter_amount_by_stepsize(amount, market_symbol):
     return max(step_size_amount, settings.MIN_SIZE[market_symbol])
 
 
-def run():
+def _execute():
     exchanges = {el().__name__: el() for el in EXCHANGES}
 
     available_balances = apply(exchanges, attrgetter("available_balances"))
@@ -132,3 +133,13 @@ def run():
                 logger.info(f"Not enough balance for trade. {bid_balance}, {ask_balance}")
     for exchange in exchanges.values():
         exchange.clear_cache()
+
+
+def execute(async_):
+    if async_:
+        thread = th.Thread(target=_execute)
+        thread.start()
+        return thread
+
+    else:
+        return _execute()

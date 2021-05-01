@@ -1,4 +1,3 @@
-# Environment stuff
 .PHONY: get-poetry
 get-poetry:
 	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
@@ -13,8 +12,6 @@ createvenv:
 localsettings:
 	cp steve/core/local_settings.example.py steve/core/local_settings.py
 
-
-# Linters
 .PHONY: black
 black:
 	poetry run black steve --check
@@ -38,34 +35,25 @@ isort!:
 .PHONY: format!
 format!: black! isort!
 
-
-# Builders
 .PHONY: build
 build:
 	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build --parallel
 
-
-# Application interactions
 .PHONY: tests
 tests:
 	docker-compose run web python manage.py test
-
 
 .PHONY: shell
 shell:
 	docker-compose run web python manage.py shell_plus --plain
 
-
 .PHONY: ipython
 ipython:
 	docker-compose run web python manage.py shell_plus --ipython
 
-
-# Database interactions
 .PHONY: migrate
 migrate:
 	docker-compose run web python manage.py migrate
-
 
 .PHONY: makemigrations
 makemigrations:

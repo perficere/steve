@@ -82,6 +82,10 @@ class Interface(BaseInterface, metaclass=Singleton):
         )
         return res["order"]["id"]
 
+    def cancel_order(self, order_id):
+        res = self.client.cancel_order(order_id=order_id)
+        return res
+
     def get_order_details(self, order_id, base=None, quote=None):
         response = self.client.order_details(order_id=order_id)["order"]
         details = {

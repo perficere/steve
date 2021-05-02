@@ -58,9 +58,16 @@ class Interface(BaseInterface, metaclass=Singleton):
             type=self.LIMIT,
             quantity=amount,
             price=price,
-            timeInForce="GTC",
+            timeInForce="FOK",
         )
         return res["orderId"]
+
+    def cancel_order(self, order_id, base, quote):
+        res = self.client.cancel_order(
+            symbol=f"{base}{quote}",
+            orderId=order_id,
+        )
+        return res
 
     def get_order_details(self, order_id, base, quote):
         status = self.client.get_order(symbol=f"{base}{quote}", orderId=order_id)
@@ -81,7 +88,6 @@ class Interface(BaseInterface, metaclass=Singleton):
             side={BID: self.BUY, ASK: self.SELL}[side],
             type=self.MARKET,
             quantity=amount,
-            timeInForce="GTC",
         )
         return res["orderId"]
 

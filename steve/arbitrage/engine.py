@@ -87,47 +87,46 @@ def run():
                 and Decimal(amount) < ask_balance_transformed
             ):
                 ask_amount = filter_amount_by_stepsize(Decimal(amount), market_symbol)
-                bid_amount = filter_amount_by_stepsize(
-                    amount * (1 - settings.FEES), market_symbol
-                )
+                if (amount * settings.FEES) >= Decimal(settings.STEP_SIZE[market_symbol]):
+                    bid_amount = filter_amount_by_stepsize(
+                        amount * (1 - settings.FEES), market_symbol
+                    )
+                else:
+                    bid_amount = ask_amount
                 # bid_amount != ask_amount ; this will happen when fees are introduced
-                bid_order_id = bid_exchange.place_limit_order(
+                # bid_order_id = bid_exchange.place_limit_order(
+                bid_order_id = bid_exchange.place_market_order(
                     base=base,
                     quote=quote,
                     side=BID,
                     amount=bid_amount,
-                    price=bid_price,
+                    # price=bid_price,
                 )
-                ask_order_id = ask_exchange.place_limit_order(
+                # ask_order_id = ask_exchange.place_limit_order(
+                ask_order_id = ask_exchange.place_market_order(
                     base=base,
                     quote=quote,
                     side=ASK,
                     amount=ask_amount,
-                    price=ask_price,
+                    # price=ask_price,
                 )
                 bid_status = bid_exchange.order_filled(bid_order_id, base, quote)
                 ask_status = ask_exchange.order_filled(ask_order_id, base, quote)
-                if bid_status:
-                    logger.info(f"Sold from {bid_xcg_name} {bid_amount} @ {bid_price}")
-                else:
-                    logger.warning(
-                        f"Sell FAILED {bid_xcg_name} {bid_amount} @ {bid_price}"
-                    )
-                    # Handle this failed transaction
-                if ask_status:
-                    logger.info(f"Bought from {ask_xcg_name} {ask_amount} @ {ask_price}")
-                else:
-                    logger.warning(
-                        f"Buy FAILED {ask_xcg_name} {ask_amount} @ {ask_price}"
-                    )
-                    # Handle this failed transaction
                 if bid_status and ask_status:
+                    logger.info(
+                        f"{bid_order_id} | Sold from {bid_xcg_name} {bid_amount} @ {bid_price}"
+                    )
+                    logger.info(
+                        f"{ask_order_id} | Bought from {ask_xcg_name} {ask_amount} @ {ask_price}"
+                    )
                     available_balances = apply(
                         exchanges, attrgetter("available_balances")
                     )
                     total_balances = get_total_balances(available_balances)
                     logger.info(f"Final balances {total_balances}")
-
+                else:
+                    logger.warning("ERROR in transaction")
+                    break
             else:
                 logger.info(f"Not enough balance for trade. {bid_balance}, {ask_balance}")
     for exchange in exchanges.values():

@@ -86,7 +86,7 @@ class Interface(BaseInterface, metaclass=Singleton):
     def place_market_order(self, base, quote, side, amount, price=None):
         # try limit order first
         res = self.place_limit_order(base, quote, side, amount, price)
-        if res['status'] != 'FILLED':
+        if res["status"] != "FILLED":
             res = self.client.create_order(
                 symbol=f"{base}{quote}",
                 side={ASK: self.BUY, BID: self.SELL}[side],

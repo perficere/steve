@@ -84,8 +84,8 @@ def run():
             # Check if enough balance for trade
             ask_balance_transformed = Decimal(ask_balance) / Decimal(ask_price)
             if (
-                amount < Decimal(bid_balance)
-                and Decimal(amount) < ask_balance_transformed
+                amount <= Decimal(bid_balance)
+                and Decimal(amount) <= ask_balance_transformed
             ):
                 ask_amount = filter_amount_by_stepsize(Decimal(amount), market_symbol)
                 if (amount * settings.FEES) >= Decimal(settings.STEP_SIZE[market_symbol]):
@@ -101,7 +101,7 @@ def run():
                     quote=quote,
                     side=BID,
                     amount=bid_amount,
-                    # price=bid_price,
+                    price=bid_price,
                 )
                 # ask_order_id = ask_exchange.place_limit_order(
                 ask_order_id = ask_exchange.place_market_order(
@@ -109,7 +109,7 @@ def run():
                     quote=quote,
                     side=ASK,
                     amount=ask_amount,
-                    # price=ask_price,
+                    price=ask_price,
                 )
                 bid_status = bid_exchange.order_filled(bid_order_id, base, quote)
                 ask_status = ask_exchange.order_filled(ask_order_id, base, quote)
@@ -127,6 +127,8 @@ def run():
                     logger.info(f"Final balances {total_balances}")
                 else:
                     logger.warning("ERROR in transaction")
+                    logger.info(ask_order_id, bid_order_id)
+                    logger.info(ask_status, bid_status)
                     break
             else:
                 logger.info(f"Not enough balance for trade. {bid_balance}, {ask_balance}")

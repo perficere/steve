@@ -60,7 +60,8 @@ class Interface(BaseInterface, metaclass=Singleton):
             price=price,
             timeInForce="FOK",
         )
-        return res["orderId"]
+        # return res["orderId"]
+        return res
 
     def cancel_order(self, order_id, base, quote):
         res = self.client.cancel_order(
@@ -76,19 +77,22 @@ class Interface(BaseInterface, metaclass=Singleton):
             "id": status["orderId"],
             "status": status["status"],
             "side": status["side"],
-            "price": status["price"],
+            # "price": status["price"],
             "amount": status["executedQty"],
             "cost": float(status["price"]) * float(status["executedQty"]),
         }
         return details
 
-    def place_market_order(self, base, quote, side, amount):
-        res = self.client.create_order(
-            symbol=f"{base}{quote}",
-            side={BID: self.BUY, ASK: self.SELL}[side],
-            type=self.MARKET,
-            quantity=amount,
-        )
+    def place_market_order(self, base, quote, side, amount, price=None):
+        # try limit order first
+        res = self.place_limit_order(base, quote, side, amount, price)
+        if res['status'] != 'FILLED':
+            res = self.client.create_order(
+                symbol=f"{base}{quote}",
+                side={ASK: self.BUY, BID: self.SELL}[side],
+                type=self.MARKET,
+                quantity=amount,
+            )
         return res["orderId"]
 
     def order_filled(self, order_id, base, quote):

@@ -73,10 +73,10 @@ class Interface(BaseInterface, metaclass=Singleton):
         )
         return res["order"]["id"]
 
-    def place_market_order(self, base, quote, side, amount):
+    def place_market_order(self, base, quote, side, amount, price=None):
         res = self.client.new_order(
             market_id=f"{base}-{quote}",
-            order_type={BID: self.BUY, ASK: self.SELL}[side],
+            order_type={ASK: self.BUY, BID: self.SELL}[side],
             price_type=self.MARKET,
             amount=amount,
         )
@@ -93,7 +93,7 @@ class Interface(BaseInterface, metaclass=Singleton):
             "id": response["id"],
             "status": response["state"],
             "side": response["type"],
-            "price": response["limit"][0],
+            # "price": response["limit"][0],
             "amount": response["traded_amount"][0],
             "cost": response["total_exchanged"][0],
         }

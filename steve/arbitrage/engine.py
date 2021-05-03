@@ -115,10 +115,16 @@ def run():
                 ask_status = ask_exchange.order_filled(ask_order_id, base, quote)
                 if bid_status and ask_status:
                     logger.info(
-                        f"{bid_order_id} | Sold from {bid_xcg_name} {bid_amount} @ {bid_price}"
+                        (
+                            f"{bid_order_id} | Sold from {bid_xcg_name} {bid_amount}"
+                            f" @ {bid_price}"
+                        )
                     )
                     logger.info(
-                        f"{ask_order_id} | Bought from {ask_xcg_name} {ask_amount} @ {ask_price}"
+                        (
+                            f"{ask_order_id} | Bought from {ask_xcg_name} {ask_amount}"
+                            f" @ {ask_price}"
+                        )
                     )
                     available_balances = apply(
                         exchanges, attrgetter("available_balances")

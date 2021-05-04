@@ -1,4 +1,5 @@
 import math
+import threading as th
 from decimal import Decimal
 from logging import getLogger
 from operator import attrgetter
@@ -46,13 +47,15 @@ def filter_amount_by_stepsize(amount, market_symbol):
     return max(step_size_amount, settings.MIN_SIZE[market_symbol])
 
 
-def run_loop(n=settings.LOOP_N):
+
+def _excecute(n=settings.LOOP_N):
     for i in range(n):
         sleep(1)
         run()
 
 
 def run():
+
     exchanges = {el().__name__: el() for el in EXCHANGES}
 
     available_balances = apply(exchanges, attrgetter("available_balances"))
@@ -150,3 +153,13 @@ def run():
                 )
     for exchange in exchanges.values():
         exchange.clear_cache()
+
+
+def execute(async_):
+    if async_:
+        thread = th.Thread(target=_execute)
+        thread.start()
+        return thread
+
+    else:
+        return _execute()

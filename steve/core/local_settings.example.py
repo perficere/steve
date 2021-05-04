@@ -55,7 +55,7 @@ STEP_SIZE = {"ETHBTC": "0.001", "LTCBTC": "0.01"}
 
 FEES = Decimal("0.007")
 
-LOOP_N = 10
+LOOP_N = 200
 
 ###########
 # SECRETS #
@@ -64,8 +64,9 @@ LOOP_N = 10
 SECRET_KEY = "X.:IU=jrQLF+<uOBeh/ZK3vE4AaCL{.d;UO(g]>qV-w6sb:nfF"
 INTERNAL_KEY = "bO|Q)[c)J[m|d]d{:+{vh:vkI7k6=*4M(^l$t9L-OG]d4jEla|"
 
-BINANCE_API_KEY = "kClOWwtWDSCGVXfX4QtDxCUzKQoF2wLaZHJtIlmsMIzmI0IjxPoc9wrB6fUjvXtV"
-BINANCE_API_SECRET = "1tifqLsFI2fnHw8Q8RW2fNmMgpYSqiLNcdaGVtXDKaw5YoHgdwT4gfxXsnWSyYQM"
+BINANCE_API_KEY = "example"
+BINANCE_API_SECRET = "example"
 
-BUDA_API_KEY = "DxCfsx1Fk8dTjPJ9OdjAH2j8e2FjqJ5Y"
-BUDA_API_SECRET = "qx7qa2AulIvf17TIQKwM8qDdrxiurfziCIhDf24A"
+BUDA_API_KEY = "example"
+BUDA_API_SECRET = "example"
+

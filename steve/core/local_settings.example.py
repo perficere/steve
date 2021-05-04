@@ -55,6 +55,7 @@ STEP_SIZE = {"ETHBTC": "0.001", "LTCBTC": "0.01"}
 
 FEES = Decimal("0.007")
 
+LOOP_N = 10
 
 ###########
 # SECRETS #

@@ -2,6 +2,7 @@ import math
 from decimal import Decimal
 from logging import getLogger
 from operator import attrgetter
+from time import sleep
 
 from django.conf import settings
 
@@ -43,6 +44,12 @@ def filter_amount_by_stepsize(amount, market_symbol):
     step_size = Decimal(settings.STEP_SIZE[market_symbol].find("1") - 1)
     step_size_amount = math.floor(amount * 10 ** step_size) / (10 ** step_size)
     return max(step_size_amount, settings.MIN_SIZE[market_symbol])
+
+
+def run_loop(n=settings.LOOP_N):
+    for i in range(n):
+        sleep(1)
+        run()
 
 
 def run():
@@ -126,17 +133,20 @@ def run():
                             f" @ {ask_price}"
                         )
                     )
+                    exchanges = {el().__name__: el() for el in EXCHANGES}
                     available_balances = apply(
                         exchanges, attrgetter("available_balances")
                     )
                     total_balances = get_total_balances(available_balances)
                     logger.info(f"Final balances {total_balances}")
+                    break
                 else:
                     logger.warning("ERROR in transaction")
                     logger.info(ask_order_id, bid_order_id)
                     logger.info(ask_status, bid_status)
-                    break
             else:
-                logger.info(f"Not enough balance for trade. {bid_balance}, {ask_balance}")
+                logger.warning(
+                    f"Not enough balance for {market} trade. Trade amount was {amount}"
+                )
     for exchange in exchanges.values():
         exchange.clear_cache()

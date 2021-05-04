@@ -47,15 +47,13 @@ def filter_amount_by_stepsize(amount, market_symbol):
     return max(step_size_amount, settings.MIN_SIZE[market_symbol])
 
 
-
-def _excecute(n=settings.LOOP_N):
+def _execute(n=settings.LOOP_N):
     for i in range(n):
         sleep(1)
         run()
 
 
 def run():
-
     exchanges = {el().__name__: el() for el in EXCHANGES}
 
     available_balances = apply(exchanges, attrgetter("available_balances"))

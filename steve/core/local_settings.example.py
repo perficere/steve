@@ -46,10 +46,10 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 TICKERS = ["BTC", "ETH", "LTC"]
 MARKETS = (["ETH", "BTC"],)
 
-MIN_DELTA = Decimal("0.01")
+MIN_DELTA = Decimal("0.015")
 
 MIN_SIZE = {"ETHBTC": Decimal("0.001"), "LTCBTC": Decimal("0.01")}  # Defined by Binance
-MAX_SIZE = {"ETHBTC": Decimal("0.02"), "LTCBTC": Decimal("0.01")}
+MAX_SIZE = {"ETHBTC": Decimal("0.03"), "LTCBTC": Decimal("0.1")}
 STEP_SIZE = {"ETHBTC": "0.001", "LTCBTC": "0.01"}
 
 

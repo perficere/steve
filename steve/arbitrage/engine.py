@@ -49,7 +49,7 @@ def filter_amount_by_stepsize(amount, market_symbol):
 
 def _execute(n=settings.LOOP_N):
     for i in range(n):
-        sleep(1)
+        sleep(2)
         run()
 
 
@@ -96,7 +96,9 @@ def run():
                 and Decimal(amount) <= ask_balance_transformed
             ):
                 ask_amount = filter_amount_by_stepsize(Decimal(amount), market_symbol)
-                if (amount * settings.FEES) >= Decimal(settings.STEP_SIZE[market_symbol]):
+                if (amount * settings.FEES) >= Decimal(
+                    settings.STEP_SIZE[market_symbol]
+                ) / 1.5:
                     bid_amount = filter_amount_by_stepsize(
                         amount * (1 - settings.FEES), market_symbol
                     )
@@ -119,8 +121,10 @@ def run():
                     amount=ask_amount,
                     price=ask_price,
                 )
-                bid_status = bid_exchange.order_filled(bid_order_id, base, quote)
-                ask_status = ask_exchange.order_filled(ask_order_id, base, quote)
+                # bid_status = bid_exchange.order_filled(bid_order_id, base, quote)
+                # ask_status = ask_exchange.order_filled(ask_order_id, base, quote)
+                bid_status = True
+                ask_status = True
                 if bid_status and ask_status:
                     logger.info(
                         (
@@ -140,15 +144,18 @@ def run():
                     )
                     total_balances = get_total_balances(available_balances)
                     logger.info(f"Final balances {total_balances}")
+                    # exit()
                     break
                 else:
                     logger.warning("ERROR in transaction")
                     logger.info(ask_order_id, bid_order_id)
                     logger.info(ask_status, bid_status)
+                    exit()
             else:
                 logger.warning(
                     f"Not enough balance for {market} trade. Trade amount was {amount}"
                 )
+                exit()
     for exchange in exchanges.values():
         exchange.clear_cache()
 

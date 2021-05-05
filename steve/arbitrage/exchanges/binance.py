@@ -22,6 +22,7 @@ class Interface(BaseInterface, metaclass=Singleton):
         super().__init__(*args, **kwargs)
 
         self.client = Client(settings.BINANCE_API_KEY, settings.BINANCE_API_SECRET)
+        self.client.verbose = True
 
     ##########
     # PUBLIC #

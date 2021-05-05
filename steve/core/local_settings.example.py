@@ -69,4 +69,3 @@ BINANCE_API_SECRET = "example"
 
 BUDA_API_KEY = "example"
 BUDA_API_SECRET = "example"
-

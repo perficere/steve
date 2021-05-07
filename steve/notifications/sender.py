@@ -48,8 +48,8 @@ class Interface(metaclass=Singleton):
         except Exception as e:
             logger.error(f"Unable to send a Telegram message: {e}")
 
-    def send(self, msg, async_=True):
-        kwargs = {"msg": msg}
+    def send(self, text, async_=True):
+        kwargs = {"text": text}
 
         if async_:
             thread = th.Thread(target=self._send, kwargs=kwargs)

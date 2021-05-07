@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from ..models import Side
+from ..models import OrderSide
 
 
 def cached(func):
@@ -41,8 +41,8 @@ class BaseInterface:
     def prices(self):
         return {
             tuple(market): {
-                Side.BID: orderbook[Side.BID][0],
-                Side.ASK: orderbook[Side.ASK][0],
+                OrderSide.BID: orderbook[OrderSide.BID][0],
+                OrderSide.ASK: orderbook[OrderSide.ASK][0],
             }
             for (market, orderbook) in self.orderbooks.items()
         }

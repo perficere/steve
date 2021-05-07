@@ -18,6 +18,8 @@ class Order(BaseModel):
     side = models.SmallIntegerField(choices=OrderSide.choices, verbose_name="side")
     type = models.SmallIntegerField(choices=OrderType.choices, verbose_name="type")
 
+    amount = models.DecimalField()
+
 
 class Trade(BaseModel):
     pass

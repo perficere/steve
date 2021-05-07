@@ -8,7 +8,7 @@ from time import sleep
 from django.conf import settings
 
 from .exchanges import EXCHANGES
-from .models import OrderSide, OrderType
+from .models import OrderSide
 
 logger = getLogger(__name__)
 

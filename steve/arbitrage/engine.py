@@ -22,8 +22,12 @@ def select(properties, inner_key):
 
 
 def find_best_trade(market_prices):
-    bids = {xcg_name: prices[OrderSide.BID] for (xcg_name, prices) in market_prices.items()}
-    asks = {xcg_name: prices[OrderSide.ASK] for (xcg_name, prices) in market_prices.items()}
+    bids = {
+        xcg_name: prices[OrderSide.BID] for (xcg_name, prices) in market_prices.items()
+    }
+    asks = {
+        xcg_name: prices[OrderSide.ASK] for (xcg_name, prices) in market_prices.items()
+    }
 
     bid_xcg_name = max(bids, key=lambda xcg_name: Decimal(bids[xcg_name][0]))
     ask_xcg_name = min(asks, key=lambda xcg_name: Decimal(asks[xcg_name][0]))

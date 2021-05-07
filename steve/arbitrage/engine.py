@@ -83,7 +83,9 @@ def run():
             Decimal(ask_amount),
             settings.MAX_SIZE[market_symbol],
         )
-        logger.info(f"DELTA IN MARKET {market_symbol}: {round(100 * delta, 4)}% | {amount}")
+        logger.info(
+            f"DELTA IN MARKET {market_symbol}: {round(100 * delta, 4)}% | {amount}"
+        )
         # logger.info(f"MIN DELTA: {100 * settings.MIN_DELTA}%")
 
         if delta >= settings.MIN_DELTA and amount >= settings.MIN_SIZE[market_symbol]:

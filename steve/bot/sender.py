@@ -31,7 +31,7 @@ class Delayer:
         pass
 
 
-class Client(metaclass=Singleton):
+class Interface(metaclass=Singleton):
     def __init__(self):
         self.bot = Bot(token=settings.TELEGRAM_TOKEN)
         self.delayer = Delayer(max_bulk_size=30, delay_seconds=1)

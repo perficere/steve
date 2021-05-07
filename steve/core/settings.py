@@ -180,9 +180,7 @@ ITERATIONS_PER_TRIGGER = int(os.environ.get("ITERATIONS_PER_TRIGGER", "1"))
 SECONDS_BETWEEN_ITERATIONS = int(os.environ.get("ITERATIONS_PER_TRIGGER", "0"))
 
 TICKERS = ["BTC", "ETH", "LTC"]
-MARKETS = (
-    ["ETH", "BTC"],
-)
+MARKETS = (["ETH", "BTC"],)
 
 MIN_DELTA = Decimal(os.environ.get("MIN_DELTA", "inf"))
 
@@ -194,10 +192,7 @@ MAX_AMOUNTS = {
     "ETHBTC": Decimal("0.03"),
     "LTCBTC": Decimal("0.1"),
 }
-STEP_AMOUNTS = {
-    "ETHBTC": Decimal("0.001"),
-    "LTCBTC": Decimal("0.01")
-}
+STEP_AMOUNTS = {"ETHBTC": Decimal("0.001"), "LTCBTC": Decimal("0.01")}
 
 
 ###########

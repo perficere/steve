@@ -78,13 +78,14 @@ def run():
 
         delta = (Decimal(bid_price) - Decimal(ask_price)) / Decimal(ask_price)
 
-        logger.info(f"DELTA IN MARKET {market_symbol}: {round(100 * delta, 4)}%")
-        logger.info(f"MIN DELTA: {100 * settings.MIN_DELTA}%")
         amount = min(
             Decimal(bid_amount),
             Decimal(ask_amount),
             settings.MAX_SIZE[market_symbol],
         )
+        logger.info(f"DELTA IN MARKET {market_symbol}: {round(100 * delta, 4)}% | {amount}")
+        # logger.info(f"MIN DELTA: {100 * settings.MIN_DELTA}%")
+
         if delta >= settings.MIN_DELTA and amount >= settings.MIN_SIZE[market_symbol]:
             logger.info(f"PLACING ORDERS FOR {amount} {base}")
             logger.info(f"Starting balances {total_balances}")
@@ -96,9 +97,7 @@ def run():
                 and Decimal(amount) <= ask_balance_transformed
             ):
                 ask_amount = filter_amount_by_stepsize(Decimal(amount), market_symbol)
-                if (amount * settings.FEES) >= Decimal(
-                    settings.STEP_SIZE[market_symbol]
-                ) / 1.5:
+                if (amount * settings.FEES) >= Decimal(settings.STEP_SIZE[market_symbol]):
                     bid_amount = filter_amount_by_stepsize(
                         amount * (1 - settings.FEES), market_symbol
                     )
@@ -145,7 +144,8 @@ def run():
                     total_balances = get_total_balances(available_balances)
                     logger.info(f"Final balances {total_balances}")
                     # exit()
-                    break
+                    sleep(20)
+                    # break
                 else:
                     logger.warning("ERROR in transaction")
                     logger.info(ask_order_id, bid_order_id)

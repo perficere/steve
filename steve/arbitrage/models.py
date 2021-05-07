@@ -19,12 +19,15 @@ class OrderSide(models.TextChoices):
 
 
 class Ticker(models.TextChoices):
-    BTC = ("BTC",)
-    ETH = ("ETH",)
-    LTC = ("LTC",)
+    BTC = "BTC"
+    ETH = "ETH"
+    LTC = "LTC"
 
 
 class Order(BaseModel):
+    class Meta:
+        abstract = True
+
     remote_id = models.PositiveBigIntegerField(verbose_name="remote ID")
     exchange_name = models.CharField(
         choices=ExchangeName.choices, max_length=50, verbose_name="exchange name"
@@ -33,7 +36,6 @@ class Order(BaseModel):
     state = models.CharField(max_length=50, verbose_name="state")
 
     type = models.SmallIntegerField(choices=OrderType.choices, verbose_name="type")
-    side = models.SmallIntegerField(choices=OrderSide.choices, verbose_name="side")
     price = models.DecimalField(max_digits=10, decimal_places=8, verbose_name="price")
 
     original_amount = models.DecimalField(
@@ -50,6 +52,14 @@ class Order(BaseModel):
         return f"{self.side} #{self.trade.pk}"
 
 
+class Bid(Order):
+    pass
+
+
+class Ask(Order):
+    pass
+
+
 class Trade(BaseModel):
     id = models.BigAutoField(
         editable=False, primary_key=True, serialize=False, unique=True, verbose_name="ID"
@@ -63,10 +73,10 @@ class Trade(BaseModel):
     )
 
     bid_order = models.OneToOneField(
-        to="arbitrage.Order", verbose_name="bid-side order", on_delete=models.PROTECT
+        to="arbitrage.Bid", verbose_name="bid-side order", on_delete=models.PROTECT
     )
     ask_order = models.OneToOneField(
-        to="arbitrage.Order", verbose_name="ask-side order", on_delete=models.PROTECT
+        to="arbitrage.Ask", verbose_name="ask-side order", on_delete=models.PROTECT
     )
 
     @property

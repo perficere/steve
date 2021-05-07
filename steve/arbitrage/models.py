@@ -18,7 +18,7 @@ class OrderSide(models.TextChoices):
     ASK = "Ask"
 
 
-class Currency(models.TextChoices):
+class Ticker(models.TextChoices):
     BTC = ("BTC",)
     ETH = ("ETH",)
     LTC = ("LTC",)
@@ -56,10 +56,10 @@ class Trade(BaseModel):
     )
 
     base = models.CharField(
-        choices=Currency.choices, max_length=50, verbose_name="market base currency"
+        choices=Ticker.choices, max_length=50, verbose_name="market base ticker"
     )
     quote = models.CharField(
-        choices=Currency.choices, max_length=50, verbose_name="market quote currency"
+        choices=Ticker.choices, max_length=50, verbose_name="market quote ticker"
     )
 
     bid_order = models.OneToOneField(

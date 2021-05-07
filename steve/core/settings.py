@@ -197,6 +197,10 @@ BINANCE_API_SECRET = os.environ.get("BINANCE_API_SECRET")
 BUDA_API_KEY = os.environ.get("BUDA_API_KEY")
 BUDA_API_SECRET = os.environ.get("BUDA_API_SECRET")
 
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+TELEGRAM_CHAT_ID = None if (TELEGRAM_CHAT_ID is None) else int(TELEGRAM_CHAT_ID)
+
 
 ##########
 # SENTRY #

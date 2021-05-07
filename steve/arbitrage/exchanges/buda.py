@@ -6,12 +6,12 @@ from trading_api_wrappers.errors import APIException
 
 from utils.metaclasses import Singleton
 
-from ..models import Side
+from ..models import ExchangeName, OrderSide
 from .base import BaseInterface
 
 
 class Interface(BaseInterface, metaclass=Singleton):
-    __name__ = "Buda"
+    __name__ = ExchangeName.BUDA
 
     BUY = constants.OrderType.BID
     SELL = constants.OrderType.ASK
@@ -42,8 +42,8 @@ class Interface(BaseInterface, metaclass=Singleton):
     def get_orderbook(self, base, quote):
         orderbook = self.client.order_book(market_id=f"{base}-{quote}")["order_book"]
 
-        orderbook[Side.BID] = orderbook.pop("bids")
-        orderbook[Side.ASK] = orderbook.pop("asks")
+        orderbook[OrderSide.BID] = orderbook.pop("bids")
+        orderbook[OrderSide.ASK] = orderbook.pop("asks")
 
         return orderbook
 
@@ -67,7 +67,7 @@ class Interface(BaseInterface, metaclass=Singleton):
     def place_limit_order(self, base, quote, side, amount, price):
         res = self.client.new_order(
             market_id=f"{base}-{quote}",
-            order_type={Side.ASK: self.BUY, Side.BID: self.SELL}[side],
+            order_type={OrderSide.ASK: self.BUY, OrderSide.BID: self.SELL}[side],
             price_type=self.LIMIT,
             amount=amount,
             limit=price,
@@ -77,7 +77,7 @@ class Interface(BaseInterface, metaclass=Singleton):
     def place_market_order(self, base, quote, side, amount, price=None):
         res = self.client.new_order(
             market_id=f"{base}-{quote}",
-            order_type={Side.ASK: self.BUY, Side.BID: self.SELL}[side],
+            order_type={OrderSide.ASK: self.BUY, OrderSide.BID: self.SELL}[side],
             price_type=self.MARKET,
             amount=amount,
         )

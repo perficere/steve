@@ -46,16 +46,10 @@ def get_total_balances(available_balances):
     return total_balances
 
 
-def filter_amount_by_stepsize(amount, market_symbol):
-    step_size = Decimal(settings.STEP_SIZE[market_symbol].find("1") - 1)
-    step_size_amount = math.floor(amount * 10 ** step_size) / (10 ** step_size)
-    return max(step_size_amount, settings.MIN_SIZE[market_symbol])
-
-
-def _execute(n=settings.LOOP_N):
-    for i in range(n):
-        sleep(2)
-        run()
+def filter_amount_by_stepamount(amount, market_symbol):
+    STEP_AMOUNTS = Decimal(settings.STEP_AMOUNTS[market_symbol].find("1") - 1)
+    STEP_AMOUNTS_amount = math.floor(amount * 10 ** STEP_AMOUNTS) / (10 ** STEP_AMOUNTS)
+    return max(STEP_AMOUNTS_amount, settings.MIN_AMOUNTS[market_symbol])
 
 
 def run():
@@ -88,9 +82,9 @@ def run():
         amount = min(
             Decimal(bid_amount),
             Decimal(ask_amount),
-            settings.MAX_SIZE[market_symbol],
+            settings.MAX_AMOUNTS[market_symbol],
         )
-        if delta >= settings.MIN_DELTA and amount >= settings.MIN_SIZE[market_symbol]:
+        if delta >= settings.MIN_DELTA and amount >= settings.MIN_AMOUNTS[market_symbol]:
             logger.info(f"PLACING ORDERS FOR {amount} {base}")
             logger.info(f"Starting balances {total_balances}")
 
@@ -100,12 +94,12 @@ def run():
                 amount <= Decimal(bid_balance)
                 and Decimal(amount) <= ask_balance_transformed
             ):
-                ask_amount = filter_amount_by_stepsize(Decimal(amount), market_symbol)
-                if (amount * settings.FEES) >= Decimal(
-                    settings.STEP_SIZE[market_symbol]
+                ask_amount = filter_amount_by_stepamount(Decimal(amount), market_symbol)
+                if (amount * settings.FEE) >= Decimal(
+                    settings.STEP_AMOUNTS[market_symbol]
                 ) / 1.5:
-                    bid_amount = filter_amount_by_stepsize(
-                        amount * (1 - settings.FEES), market_symbol
+                    bid_amount = filter_amount_by_stepamount(
+                        amount * (1 - settings.FEE), market_symbol
                     )
                 else:
                     bid_amount = ask_amount
@@ -165,11 +159,19 @@ def run():
         exchange.clear_cache()
 
 
+def _execute(n):
+    for i in range(n):
+        sleep(2)
+        run()
+
+
 def execute(async_):
+    kwargs = {"n": settings.ITERATIONS_PER_TRIGGER}
+
     if async_:
-        thread = th.Thread(target=_execute)
+        thread = th.Thread(target=_execute, kwargs=kwargs)
         thread.start()
         return thread
 
     else:
-        return _execute()
+        return _execute(**kwargs)

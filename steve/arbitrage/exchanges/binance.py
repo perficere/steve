@@ -6,12 +6,12 @@ from binance.exceptions import BinanceAPIException as APIException
 
 from utils.metaclasses import Singleton
 
-from ..models import OrderSide
+from ..models import ExchangeName, OrderSide
 from .base import BaseInterface
 
 
 class Interface(BaseInterface, metaclass=Singleton):
-    __name__ = "Binance"
+    __name__ = ExchangeName.BINANCE
 
     BUY = enums.SIDE_BUY
     SELL = enums.SIDE_SELL

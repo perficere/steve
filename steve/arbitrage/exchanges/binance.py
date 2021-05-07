@@ -6,7 +6,8 @@ from binance.exceptions import BinanceAPIException as APIException
 
 from utils.metaclasses import Singleton
 
-from .base import ASK, BID, BaseInterface
+from ..models import OrderSide
+from .base import BaseInterface
 
 
 class Interface(BaseInterface, metaclass=Singleton):
@@ -40,8 +41,8 @@ class Interface(BaseInterface, metaclass=Singleton):
     def get_orderbook(self, base, quote):
         orderbook = self.client.get_order_book(symbol=f"{base}{quote}")
 
-        orderbook[BID] = orderbook.pop("bids")
-        orderbook[ASK] = orderbook.pop("asks")
+        orderbook[OrderSide.BID] = orderbook.pop("bids")
+        orderbook[OrderSide.ASK] = orderbook.pop("asks")
 
         return orderbook
 
@@ -55,7 +56,7 @@ class Interface(BaseInterface, metaclass=Singleton):
     def place_limit_order(self, base, quote, side, amount, price):
         res = self.client.create_order(
             symbol=f"{base}{quote}",
-            side={ASK: self.BUY, BID: self.SELL}[side],
+            side={OrderSide.ASK: self.BUY, OrderSide.BID: self.SELL}[side],
             type=self.LIMIT,
             quantity=amount,
             price=price,
@@ -90,7 +91,7 @@ class Interface(BaseInterface, metaclass=Singleton):
         if res["status"] != "FILLED":
             res = self.client.create_order(
                 symbol=f"{base}{quote}",
-                side={ASK: self.BUY, BID: self.SELL}[side],
+                side={OrderSide.ASK: self.BUY, OrderSide.BID: self.SELL}[side],
                 type=self.MARKET,
                 quantity=amount,
             )

@@ -7,7 +7,8 @@ from time import sleep
 
 from django.conf import settings
 
-from .exchanges import ASK, BID, EXCHANGES
+from .exchanges import EXCHANGES
+from .models import OrderSide, OrderType
 
 logger = getLogger(__name__)
 
@@ -21,8 +22,8 @@ def select(properties, inner_key):
 
 
 def find_best_trade(market_prices):
-    bids = {xcg_name: prices[BID] for (xcg_name, prices) in market_prices.items()}
-    asks = {xcg_name: prices[ASK] for (xcg_name, prices) in market_prices.items()}
+    bids = {xcg_name: prices[OrderSide.BID] for (xcg_name, prices) in market_prices.items()}
+    asks = {xcg_name: prices[OrderSide.ASK] for (xcg_name, prices) in market_prices.items()}
 
     bid_xcg_name = max(bids, key=lambda xcg_name: Decimal(bids[xcg_name][0]))
     ask_xcg_name = min(asks, key=lambda xcg_name: Decimal(asks[xcg_name][0]))
@@ -73,8 +74,8 @@ def run():
         bid_balance = available_balances[bid_xcg_name][base]
         ask_balance = available_balances[ask_xcg_name][quote]
 
-        bid_price, bid_amount = prices[bid_xcg_name][BID]
-        ask_price, ask_amount = prices[ask_xcg_name][ASK]
+        bid_price, bid_amount = prices[bid_xcg_name][OrderSide.BID]
+        ask_price, ask_amount = prices[ask_xcg_name][OrderSide.ASK]
 
         delta = (Decimal(bid_price) - Decimal(ask_price)) / Decimal(ask_price)
 
@@ -109,7 +110,7 @@ def run():
                 bid_order_id = bid_exchange.place_market_order(
                     base=base,
                     quote=quote,
-                    side=BID,
+                    side=OrderSide.BID,
                     amount=bid_amount,
                     price=bid_price,
                 )
@@ -117,7 +118,7 @@ def run():
                 ask_order_id = ask_exchange.place_market_order(
                     base=base,
                     quote=quote,
-                    side=ASK,
+                    side=OrderSide.ASK,
                     amount=ask_amount,
                     price=ask_price,
                 )

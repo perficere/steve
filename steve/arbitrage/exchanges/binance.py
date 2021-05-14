@@ -95,7 +95,8 @@ class Interface(BaseInterface, metaclass=Singleton):
                 type=self.MARKET,
                 quantity=amount,
             )
-        return res["orderId"]
+            return res["orderId"], 0
+        return res["orderId"], 1
 
     def order_filled(self, order_id, base, quote):
         details = self.get_order_details(order_id, base, quote)

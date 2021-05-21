@@ -11,11 +11,12 @@ from .exchanges import ASK, BID, EXCHANGES
 
 logger = getLogger(__name__)
 
-import requests
 import json
 
-class telegram_chatbot():
+import requests
 
+
+class telegram_chatbot:
     def __init__(self, config=None):
         self.token = self.read_token_from_config_file(config)
         self.base = "https://api.telegram.org/bot{}/".format(self.token)
@@ -26,11 +27,13 @@ class telegram_chatbot():
             requests.get(url)
 
     def read_token_from_config_file(self, config=None):
-        return '1768966683:AAGtXy1_oUKnhohLhxeb-x97x9dTLUPz3YE'
+        return "1768966683:AAGtXy1_oUKnhohLhxeb-x97x9dTLUPz3YE"
+
 
 bot = telegram_chatbot()
 # telegram_id = '754457406' # Alex
-telegram_id = '-276230411'
+telegram_id = "-276230411"
+
 
 def apply(exchanges, func):
     return {xcg_name: func(exchange) for (xcg_name, exchange) in exchanges.items()}
@@ -77,7 +80,10 @@ def _execute(n=settings.LOOP_N):
             run()
         except Exception as err:
             x += 1
-            bot.send_message(err, telegram_id)
+            try:
+                bot.send_message(err, telegram_id)
+            except Exception as err:
+                pass
             sleep(30)
             if x > 20:
                 bot.send_message(f"Bot exited after {x} errors", telegram_id)
@@ -120,17 +126,20 @@ def run():
         else:
             mult = 1
 
-        amount = round(min(
-            Decimal(bid_amount),
-            Decimal(ask_amount),
-            settings.MAX_SIZE[market_symbol] * mult,
-            Decimal(bid_balance),
-            ask_balance_transformed,
-        ),5)
+        amount = round(
+            min(
+                Decimal(bid_amount),
+                Decimal(ask_amount),
+                settings.MAX_SIZE[market_symbol] * mult,
+                Decimal(bid_balance),
+                ask_balance_transformed,
+            ),
+            5,
+        )
+        # amount = filter_amount_by_stepsize(amount, market_symbol)
         logger.info(
             f"DELTA IN MARKET {market_symbol}: {round(100 * delta, 4)}% | {amount}"
         )
-        # bot.send_message(f"DELTA IN MARKET {market_symbol}: {round(100 * delta, 4)}% | {amount}", '754457406')
         # logger.info(f"MIN DELTA: {100 * settings.MIN_DELTA}%")
 
         if delta >= settings.MIN_DELTA and amount >= settings.MIN_SIZE[market_symbol]:
@@ -140,7 +149,7 @@ def run():
             # Check if enough balance for trade
             # ask_balance_transformed = Decimal(ask_balance) / Decimal(ask_price)
             if (
-                amount <= Decimal(bid_balance)
+                amount < Decimal(bid_balance)
                 and Decimal(amount) < ask_balance_transformed
             ):
                 ask_amount = filter_amount_by_stepsize(Decimal(amount), market_symbol)
@@ -189,13 +198,17 @@ def run():
                             f" @ {ask_price}"
                         )
                     )
+                    profit = (bid_amount * Decimal(bid_price)) - (
+                        ask_amount * Decimal(ask_price)
+                    )
                     msg = (
-                            f"PLACING ORDERS FOR {amount} {base} WITH DELTA {round(100 * delta, 4)}%\n"
-                            f"{bid_order_id} | Sold from {bid_xcg_name} {bid_amount}"
-                            f" @ {bid_price}\n"
-                            f"{ask_order_id} | Bought from {ask_xcg_name} {ask_amount}"
-                            f" @ {ask_price}"
-                            f"| {type_msg}"
+                        f"PLACING ORDERS FOR {amount} {base} WITH DELTA {round(100 * delta, 4)}%\n"
+                        f"{bid_order_id} | Sold from {bid_xcg_name} {bid_amount}"
+                        f" @ {bid_price}\n"
+                        f"{ask_order_id} | Bought from {ask_xcg_name} {ask_amount}"
+                        f" @ {ask_price}"
+                        f"| {type_msg}"
+                        f"\nProfit: {round(profit, 6)} BTC"
                     )
                     bot.send_message(msg, telegram_id)
                     exchanges = {el().__name__: el() for el in EXCHANGES}
@@ -205,8 +218,8 @@ def run():
                     total_balances = get_total_balances(available_balances)
                     logger.info(f"Final balances {total_balances}")
                     # exit()
-                    if delta < 0.04:
-                        sleep(5)
+                    if delta < 0.035:
+                        sleep(3)
                     # break
                 else:
                     logger.warning("ERROR in transaction")
@@ -219,7 +232,10 @@ def run():
                     f"Not enough balance for {market} trade. Trade amount was {amount}"
                 )
                 logger.warning(available_balances)
-                bot.send_message(f"BALANCE ERROR for {market} trade. Trade amount was {amount}", telegram_id)
+                bot.send_message(
+                    f"BALANCE ERROR for {market} trade. Trade amount was {amount}",
+                    telegram_id,
+                )
                 # exit()
     for exchange in exchanges.values():
         exchange.clear_cache()

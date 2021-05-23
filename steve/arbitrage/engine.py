@@ -10,6 +10,7 @@ from django.conf import settings
 from .exchanges import ASK, BID, EXCHANGES
 
 logger = getLogger(__name__)
+exchanges = {el().__name__: el() for el in EXCHANGES}
 
 import json
 
@@ -74,10 +75,12 @@ def _execute(n=settings.LOOP_N):
     x = 0
     # for i in range(n):
     # bot.send_message("Bot started running.", telegram_id)
+    available_balances = apply(exchanges, attrgetter("available_balances"))
     while True:
         # sleep(1 )
         try:
-            run()
+            if run(available_balances):
+                available_balances = apply(exchanges, attrgetter("available_balances"))
         except Exception as err:
             x += 1
             try:
@@ -90,10 +93,10 @@ def _execute(n=settings.LOOP_N):
                 exit()
 
 
-def run():
-    exchanges = {el().__name__: el() for el in EXCHANGES}
+def run(available_balances):
+    # exchanges = {el().__name__: el() for el in EXCHANGES}
 
-    available_balances = apply(exchanges, attrgetter("available_balances"))
+    # available_balances = apply(exchanges, attrgetter("available_balances"))
     total_balances = get_total_balances(available_balances)
     all_prices = apply(exchanges, attrgetter("prices"))
 
@@ -211,7 +214,6 @@ def run():
                         f"\nProfit: {round(profit, 6)} BTC"
                     )
                     bot.send_message(msg, telegram_id)
-                    exchanges = {el().__name__: el() for el in EXCHANGES}
                     available_balances = apply(
                         exchanges, attrgetter("available_balances")
                     )
@@ -221,6 +223,7 @@ def run():
                     if delta < 0.035:
                         sleep(3)
                     # break
+                    return True
                 else:
                     logger.warning("ERROR in transaction")
                     logger.info(ask_order_id, bid_order_id)
@@ -239,6 +242,7 @@ def run():
                 # exit()
     for exchange in exchanges.values():
         exchange.clear_cache()
+    return False
 
 
 def execute(async_):

@@ -89,13 +89,15 @@ class Interface(BaseInterface, metaclass=Singleton):
         # try limit order first
         res = self.place_limit_order(base, quote, side, amount, price)
         if res["status"] != "FILLED":
+            print("Binance order bought at market")
             res = self.client.create_order(
                 symbol=f"{base}{quote}",
                 side={OrderSide.ASK: self.BUY, OrderSide.BID: self.SELL}[side],
                 type=self.MARKET,
                 quantity=amount,
             )
-        return res["orderId"]
+            return res["orderId"], 0
+        return res["orderId"], 1
 
     def order_filled(self, order_id, base, quote):
         details = self.get_order_details(order_id, base, quote)

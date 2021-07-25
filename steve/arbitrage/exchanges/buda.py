@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.conf import settings
 
 from trading_api_wrappers.buda import BudaAuth as Client
@@ -42,8 +44,13 @@ class Interface(BaseInterface, metaclass=Singleton):
     def get_orderbook(self, base, quote):
         orderbook = self.client.order_book(market_id=f"{base}-{quote}")["order_book"]
 
-        orderbook[OrderSide.BID] = orderbook.pop("bids")
-        orderbook[OrderSide.ASK] = orderbook.pop("asks")
+        orderbook[BID] = orderbook.pop("bids")
+        orderbook[ASK] = orderbook.pop("asks")
+        # Test: ignore small order size in first bid/ask
+        if Decimal(orderbook[BID][0][1]) < settings.MIN_SIZE[f"{base}{quote}"]:
+            orderbook[BID] = orderbook[BID][1:]
+        if Decimal(orderbook[ASK][0][1]) < settings.MIN_SIZE[f"{base}{quote}"]:
+            orderbook[ASK] = orderbook[ASK][1:]
 
         return orderbook
 
@@ -72,16 +79,17 @@ class Interface(BaseInterface, metaclass=Singleton):
             amount=amount,
             limit=price,
         )
-        return res["order"]["id"]
+        return res["order"]["id"], -1
 
     def place_market_order(self, base, quote, side, amount, price=None):
-        res = self.client.new_order(
-            market_id=f"{base}-{quote}",
-            order_type={OrderSide.ASK: self.BUY, OrderSide.BID: self.SELL}[side],
-            price_type=self.MARKET,
-            amount=amount,
-        )
-        return res["order"]["id"]
+        return self.place_limit_order(base, quote, side, amount, price)
+        # res = self.client.new_order(
+        #     market_id=f"{base}-{quote}",
+        #     order_type={ASK: self.BUY, BID: self.SELL}[side],
+        #     price_type=self.MARKET,
+        #     amount=amount,
+        # )
+        # return res["order"]["id"]
 
     def cancel_order(self, order_id):
         res = self.client.cancel_order(order_id=order_id)

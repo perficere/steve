@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.conf import settings
 
 from trading_api_wrappers.buda import BudaAuth as Client
@@ -43,6 +45,11 @@ class Interface(BaseInterface, metaclass=Singleton):
 
         orderbook[BID] = orderbook.pop("bids")
         orderbook[ASK] = orderbook.pop("asks")
+        # Test: ignore small order size in first bid/ask
+        if Decimal(orderbook[BID][0][1]) < settings.MIN_SIZE[f"{base}{quote}"]:
+            orderbook[BID] = orderbook[BID][1:]
+        if Decimal(orderbook[ASK][0][1]) < settings.MIN_SIZE[f"{base}{quote}"]:
+            orderbook[ASK] = orderbook[ASK][1:]
 
         return orderbook
 

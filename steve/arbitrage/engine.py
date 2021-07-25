@@ -81,6 +81,8 @@ def _execute(n=settings.LOOP_N):
         try:
             if run(available_balances):
                 available_balances = apply(exchanges, attrgetter("available_balances"))
+            for exchange in exchanges.values():
+                exchange.clear_cache()
         except Exception as err:
             x += 1
             try:
@@ -88,7 +90,7 @@ def _execute(n=settings.LOOP_N):
             except Exception as err:
                 pass
             sleep(30)
-            if x > 20:
+            if x >= 20:
                 bot.send_message(f"Bot exited after {x} errors", telegram_id)
                 exit()
 
@@ -184,8 +186,12 @@ def run(available_balances):
                 )
                 if type_ == 0:
                     type_msg = "Binance filled at MARKET"
-                # bid_status = bid_exchange.order_filled(bid_order_id, base, quote)
-                # ask_status = ask_exchange.order_filled(ask_order_id, base, quote)
+                try:
+                    bid_status = bid_exchange.order_filled(bid_order_id, base, quote)
+                    ask_status = ask_exchange.order_filled(ask_order_id, base, quote)
+                    print(bid_status, ask_status)
+                except Exception as err:
+                    print(err)
                 bid_status = True
                 ask_status = True
                 if bid_status and ask_status:
@@ -201,9 +207,11 @@ def run(available_balances):
                             f" @ {ask_price}"
                         )
                     )
+                    # print("test 0")
                     profit = (bid_amount * Decimal(bid_price)) - (
                         ask_amount * Decimal(ask_price)
                     )
+                    # print("test 1")
                     msg = (
                         f"PLACING ORDERS FOR {amount} {base} WITH DELTA {round(100 * delta, 4)}%\n"
                         f"{bid_order_id} | Sold from {bid_xcg_name} {bid_amount}"
@@ -211,17 +219,32 @@ def run(available_balances):
                         f"{ask_order_id} | Bought from {ask_xcg_name} {ask_amount}"
                         f" @ {ask_price}"
                         f"| {type_msg}"
-                        f"\nProfit: {round(profit, 6)} BTC"
+                        f"\nProfit:"
                     )
-                    bot.send_message(msg, telegram_id)
+                    #     f"\nProfit: {round(profit, 6)} BTC"
+                    # )
+                    # print(f'test2 {msg}')
+                    # bot.send_message(msg, telegram_id)
                     available_balances = apply(
                         exchanges, attrgetter("available_balances")
                     )
-                    total_balances = get_total_balances(available_balances)
-                    logger.info(f"Final balances {total_balances}")
+                    final_total_balances = get_total_balances(available_balances)
+                    logger.info(f"Final balances {final_total_balances}")
+                    binance = exchanges["Binance"]
+                    for t in final_total_balances:
+                        if total_balances[t] != final_total_balances[t]:
+                            p = final_total_balances[t] - total_balances[t]
+                            usd_price = Decimal(
+                                binance.client.get_avg_price(symbol=f"{t}USDT")["price"]
+                            )
+                            equivalent = round((usd_price * p), 2)
+                            msg += f"\n{round(p, 6)} {t} ≈ ${equivalent}"
                     # exit()
-                    if delta < 0.035:
-                        sleep(3)
+                    bot.send_message(msg, telegram_id)
+                    # sleep(5)
+                    # exit()
+                    if delta < 0.027:
+                        sleep(5)
                     # break
                     return True
                 else:
@@ -229,7 +252,7 @@ def run(available_balances):
                     logger.info(ask_order_id, bid_order_id)
                     logger.info(ask_status, bid_status)
                     bot.send_message("Bot exited with error", telegram_id)
-                    exit()
+                    # exit()
             else:
                 logger.warning(
                     f"Not enough balance for {market} trade. Trade amount was {amount}"
@@ -240,8 +263,9 @@ def run(available_balances):
                     telegram_id,
                 )
                 # exit()
-    for exchange in exchanges.values():
-        exchange.clear_cache()
+                return True
+    # for exchange in exchanges.values():
+    #     exchange.clear_cache()
     return False
 
 

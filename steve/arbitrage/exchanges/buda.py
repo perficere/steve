@@ -45,11 +45,15 @@ class Interface(BaseInterface, metaclass=Singleton):
 
         orderbook[BID] = orderbook.pop("bids")
         orderbook[ASK] = orderbook.pop("asks")
-        # Test: ignore small order size in first bid/ask
-        if Decimal(orderbook[BID][0][1]) < settings.MIN_SIZE[f"{base}{quote}"]:
+        # Test: ignore small order size
+        while Decimal(orderbook[BID][0][1]) < settings.MIN_ORDER_SIZE[f"{base}{quote}"]:
+            partial = orderbook[BID][0][1]
             orderbook[BID] = orderbook[BID][1:]
-        if Decimal(orderbook[ASK][0][1]) < settings.MIN_SIZE[f"{base}{quote}"]:
+            orderbook[BID][0][1] = str(Decimal(orderbook[BID][0][1]) + Decimal(partial))
+        while Decimal(orderbook[ASK][0][1]) < settings.MIN_ORDER_SIZE[f"{base}{quote}"]:
+            partial = orderbook[ASK][0][1]
             orderbook[ASK] = orderbook[ASK][1:]
+            orderbook[ASK][0][1] = str(Decimal(orderbook[ASK][0][1]) + Decimal(partial))
 
         return orderbook
 

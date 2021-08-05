@@ -86,11 +86,12 @@ def _execute(n=settings.LOOP_N):
         except Exception as err:
             x += 1
             try:
-                bot.send_message(err, telegram_id)
+                if 'Connection aborted' not in err and 'HTTPSConnectionPool' not in err:
+                    bot.send_message(err, telegram_id)
             except Exception as err:
                 pass
             sleep(30)
-            if x >= 20:
+            if x >= 40:
                 bot.send_message(f"Bot exited after {x} errors", telegram_id)
                 exit()
 

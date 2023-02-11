@@ -27,7 +27,7 @@ black = "^20.8b1"
 flake8 = "^3.9.0"
 pydotplus = "^2.0.2"
 isort = "^5.7.0"
-ipython = "^7.22.0"
+ipython = "^8.10.0"
 
 [tool.black]
 line-length = 90

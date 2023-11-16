@@ -33,7 +33,6 @@ class telegram_chatbot:
 
 
 bot = telegram_chatbot()
-# telegram_id = '754457406' # Alex
 telegram_id = "-276230411"
 
 

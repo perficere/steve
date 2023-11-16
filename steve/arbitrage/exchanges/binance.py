@@ -6,11 +6,12 @@ from binance.exceptions import BinanceAPIException as APIException
 
 from utils.metaclasses import Singleton
 
-from .base import ASK, BID, BaseInterface
+from ..models import ExchangeName, OrderSide
+from .base import BaseInterface
 
 
 class Interface(BaseInterface, metaclass=Singleton):
-    __name__ = "Binance"
+    __name__ = ExchangeName.BINANCE
 
     BUY = enums.SIDE_BUY
     SELL = enums.SIDE_SELL
@@ -22,6 +23,7 @@ class Interface(BaseInterface, metaclass=Singleton):
         super().__init__(*args, **kwargs)
 
         self.client = Client(settings.BINANCE_API_KEY, settings.BINANCE_API_SECRET)
+        self.client.verbose = True
 
     ##########
     # PUBLIC #
@@ -39,8 +41,8 @@ class Interface(BaseInterface, metaclass=Singleton):
     def get_orderbook(self, base, quote):
         orderbook = self.client.get_order_book(symbol=f"{base}{quote}")
 
-        orderbook[BID] = orderbook.pop("bids")
-        orderbook[ASK] = orderbook.pop("asks")
+        orderbook[OrderSide.BID] = orderbook.pop("bids")
+        orderbook[OrderSide.ASK] = orderbook.pop("asks")
 
         return orderbook
 
@@ -54,13 +56,21 @@ class Interface(BaseInterface, metaclass=Singleton):
     def place_limit_order(self, base, quote, side, amount, price):
         res = self.client.create_order(
             symbol=f"{base}{quote}",
-            side={ASK: self.BUY, BID: self.SELL}[side],
+            side={OrderSide.ASK: self.BUY, OrderSide.BID: self.SELL}[side],
             type=self.LIMIT,
             quantity=amount,
             price=price,
-            timeInForce="GTC",
+            timeInForce="FOK",
         )
-        return res["orderId"]
+        # return res["orderId"]
+        return res
+
+    def cancel_order(self, order_id, base, quote):
+        res = self.client.cancel_order(
+            symbol=f"{base}{quote}",
+            orderId=order_id,
+        )
+        return res
 
     def get_order_details(self, order_id, base, quote):
         status = self.client.get_order(symbol=f"{base}{quote}", orderId=order_id)
@@ -69,21 +79,25 @@ class Interface(BaseInterface, metaclass=Singleton):
             "id": status["orderId"],
             "status": status["status"],
             "side": status["side"],
-            "price": status["price"],
+            # "price": status["price"],
             "amount": status["executedQty"],
             "cost": float(status["price"]) * float(status["executedQty"]),
         }
         return details
 
-    def place_market_order(self, base, quote, side, amount):
-        res = self.client.create_order(
-            symbol=f"{base}{quote}",
-            side={BID: self.BUY, ASK: self.SELL}[side],
-            type=self.MARKET,
-            quantity=amount,
-            timeInForce="GTC",
-        )
-        return res["orderId"]
+    def place_market_order(self, base, quote, side, amount, price=None):
+        # try limit order first
+        res = self.place_limit_order(base, quote, side, amount, price)
+        if res["status"] != "FILLED":
+            print("Binance order bought at market")
+            res = self.client.create_order(
+                symbol=f"{base}{quote}",
+                side={OrderSide.ASK: self.BUY, OrderSide.BID: self.SELL}[side],
+                type=self.MARKET,
+                quantity=amount,
+            )
+            return res["orderId"], 0
+        return res["orderId"], 1
 
     def order_filled(self, order_id, base, quote):
         details = self.get_order_details(order_id, base, quote)

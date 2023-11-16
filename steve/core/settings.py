@@ -176,12 +176,23 @@ LOGGING = {
 # PARAMETERS #
 ##############
 
-TICKERS = os.environ.get("TICKERS", "").split(" ")
-MARKETS = tuple(
-    map(lambda pair: pair.split(","), os.environ.get("MARKETS", "").split(" "))
-)
+ITERATIONS_PER_TRIGGER = int(os.environ.get("ITERATIONS_PER_TRIGGER", "1"))
+SECONDS_BETWEEN_ITERATIONS = int(os.environ.get("ITERATIONS_PER_TRIGGER", "0"))
+
+TICKERS = ["BTC", "ETH", "LTC"]
+MARKETS = (["ETH", "BTC"],)
 
 MIN_DELTA = Decimal(os.environ.get("MIN_DELTA", "inf"))
+
+MIN_AMOUNTS = {
+    "ETHBTC": Decimal("0.001"),
+    "LTCBTC": Decimal("0.01"),
+}
+MAX_AMOUNTS = {
+    "ETHBTC": Decimal("0.03"),
+    "LTCBTC": Decimal("0.1"),
+}
+STEP_AMOUNTS = {"ETHBTC": Decimal("0.001"), "LTCBTC": Decimal("0.01")}
 
 
 ###########
@@ -196,6 +207,10 @@ BINANCE_API_SECRET = os.environ.get("BINANCE_API_SECRET")
 
 BUDA_API_KEY = os.environ.get("BUDA_API_KEY")
 BUDA_API_SECRET = os.environ.get("BUDA_API_SECRET")
+
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
+TELEGRAM_CHAT_ID = None if (TELEGRAM_CHAT_ID is None) else int(TELEGRAM_CHAT_ID)
 
 
 ##########
